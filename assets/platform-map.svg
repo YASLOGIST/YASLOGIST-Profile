@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="348" viewBox="0 0 1200 348" role="img" aria-label="Land, Ocean, Air and Intelligence">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0b192b"/><stop offset="1" stop-color="#07121f"/></linearGradient>
+<linearGradient id="card" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#152b3a"/><stop offset="1" stop-color="#0c1d2b"/></linearGradient>
+<linearGradient id="bar" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#5debd7"/><stop offset=".5" stop-color="#539cd9"/><stop offset="1" stop-color="#ffa864"/></linearGradient>
+<pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse"><path d="M48 0H0V48" fill="none" stroke="#234557" stroke-opacity=".25"/></pattern>
+</defs>
+<rect width="1200" height="348" rx="24" fill="url(#bg)"/>
+<rect width="1200" height="348" rx="24" fill="url(#grid)"/>
+<path d="M40 61H1160" stroke="#325465" stroke-opacity=".5"/>
+<text x="44" y="39" font-family="Arial,Helvetica,sans-serif" font-size="16" letter-spacing="4" fill="#71c9cf">01 / MULTIMODAL SYSTEMS</text>
+<text x="1157" y="39" text-anchor="end" font-family="monospace" font-size="12" letter-spacing="2" fill="#87a7b5">ARCHITECTURE / PUBLIC VIEW</text>
+<rect x="42" y="79" width="360" height="171" rx="15" fill="url(#card)" stroke="#295861"/>
+<rect x="420" y="79" width="360" height="171" rx="15" fill="url(#card)" stroke="#29566e"/>
+<rect x="798" y="79" width="360" height="171" rx="15" fill="url(#card)" stroke="#5a4b43"/>
+<rect x="61" y="97" width="5" height="29" rx="2" fill="#64e8ce"/>
+<rect x="439" y="97" width="5" height="29" rx="2" fill="#6db5ed"/>
+<rect x="817" y="97" width="5" height="29" rx="2" fill="#feb576"/>
+<text x="83" y="123" font-family="Arial,Helvetica,sans-serif" font-size="31" font-weight="bold" fill="#ecfaf9">LAND</text>
+<text x="461" y="123" font-family="Arial,Helvetica,sans-serif" font-size="31" font-weight="bold" fill="#ecfaf9">OCEAN</text>
+<text x="839" y="123" font-family="Arial,Helvetica,sans-serif" font-size="31" font-weight="bold" fill="#ecfaf9">AIR</text>
+<text x="84" y="150" font-family="monospace" font-size="12" fill="#83aeae">GROUND OPERATIONS</text>
+<text x="462" y="150" font-family="monospace" font-size="12" fill="#8bacc9">MARITIME SCENARIOS</text>
+<text x="840" y="150" font-family="monospace" font-size="12" fill="#c8ad8f">AIR-FREIGHT PLANNING</text>
+<path d="M82 219H363 M460 219H741 M838 219H1119" stroke="#385a68" stroke-width="1"/>
+<g stroke="#5debd7" stroke-width="2" fill="none" opacity=".75"><path d="M102 193H180L202 173H260L284 187H345"/><circle cx="102" cy="193" r="4" fill="#5debd7"/><circle cx="202" cy="173" r="4" fill="#5debd7"/><circle cx="345" cy="187" r="4" fill="#5debd7"/></g>
+<g stroke="#6db5ed" stroke-width="2" fill="none" opacity=".8"><path d="M475 201Q505 168 544 200T613 200T687 184T727 199"/><path d="M488 210H720" opacity=".3"/></g>
+<g stroke="#feb576" stroke-width="2" fill="none" opacity=".8"><path d="M859 202C922 203 955 158 1034 178S1082 199 1120 168"/><circle cx="859" cy="202" r="4" fill="#feb576"/><circle cx="1120" cy="168" r="4" fill="#feb576"/></g>
+<circle cx="223" cy="250" r="4" fill="#65e5d4"/>
+<circle cx="600" cy="250" r="4" fill="#6db5ed"/>
+<circle cx="978" cy="250" r="4" fill="#feb576"/>
+<path d="M223 253V272H978V253M600 252V272" fill="none" stroke="#5b91a4" stroke-width="2"/>
+<rect x="42" y="275" width="1116" height="53" rx="11" fill="#11323c" stroke="#3d858d"/>
+<rect x="42" y="275" width="1116" height="4" fill="url(#bar)" rx="2"/>
+<text x="69" y="309" font-family="Arial,Helvetica,sans-serif" font-size="19" font-weight="bold" letter-spacing="1.2" fill="#b9ebe8">DATA  /  VISIBILITY  /  INTELLIGENCE</text>
+<text x="1130" y="308" text-anchor="end" font-family="monospace" font-size="12" fill="#81acb4">SYSTEMS THAT CONNECT</text>
+</svg>
