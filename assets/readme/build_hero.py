@@ -23,11 +23,17 @@ fills them with transparency. What actually governs the file size on this
 scene is how many pixels change per frame, so the art direction was tuned for
 motion economy (see `camera()` in `scene.py`) - not the palette alone.
 
+Every run also writes `yaslogist-hero.build.json`, a provenance stamp of the
+inputs that produced the committed pixels. Pass `--stamp-only` to refresh it
+without re-rendering (for example after editing this file's comments).
+
 The artwork is a schematic map of the public portfolio. Route lines are
 illustrative gateway metaphors and are labelled as such on screen.
 """
 from __future__ import annotations
 
+import hashlib
+import json
 import sys
 import time
 from pathlib import Path
@@ -39,6 +45,7 @@ import numpy as np
 from PIL import Image
 
 HERE = Path(__file__).resolve().parent
+ROOT = HERE.parent.parent
 sys.path.insert(0, str(HERE))
 
 import scene  # noqa: E402
@@ -47,23 +54,85 @@ from scene import DELAY_MS, FRAMES, H, W, Scene  # noqa: E402
 GIF_OUT = HERE / "yaslogist-hero.gif"
 PNG_OUT = HERE / "yaslogist-hero.png"
 
-# The committed artwork is byte-reproducible only with the Pillow build that
-# produced it: glyph antialiasing comes from FreeType, and Pillow 11 and 13 do
-# not rasterise the bundled Inter/JetBrains faces identically (~0.6/255 mean
-# difference across the frame, concentrated on type edges). This pin is the
-# version under which `tools/verify_assets.py --reproduce` matches the
-# committed GIF exactly.
+# Rendering is not bit-reproducible across machines: glyph antialiasing comes
+# from FreeType inside the Pillow wheel, float paths in NumPy vary with SIMD
+# dispatch, and palette mapping flips on near-threshold pixels. Measured on the
+# committed artwork: re-rendering frame 100 on Pillow 11.3 instead of 13.0
+# differs by 0.57/255 mean, and the same Pillow 13 on a GitHub runner differs
+# by 0.72/255. So a "does it still render the same pixels" check cannot be a
+# pass/fail gate.
 #
-# If you regenerate the artwork with a different Pillow, update this string in
-# the same commit - the verifier reads it to decide whether an exact match is
-# even achievable, and falls back to a structural comparison otherwise.
-RENDERER_PIN = "13.0.0"
+# What *can* be verified exactly is staleness, which is the failure mode that
+# actually happens (edit the scene, forget to rebuild). Every run writes
+# STAMP_OUT: a hash of the pixels' inputs plus the size and SHA-256 of the
+# artwork it just produced. `tools/verify_assets.py` recomputes those hashes and
+# fails when the committed artwork no longer belongs to the current sources.
+STAMP_OUT = HERE / "yaslogist-hero.build.json"
+INPUT_FILES = (
+    "assets/readme/build_hero.py",
+    "assets/readme/mark.py",
+    "assets/readme/scene.py",
+    "assets/readme/yaslogist-mark.svg",
+)
 
 PALETTE_SAMPLES = 16          # frames averaged into the single global palette
 PALETTE_COLORS = 254          # single shared palette; the brand wordmark
                               # needs the full range to stay pristine
 POSTERIZE = 1                 # 1 = leave the source alone before mapping
 POSTER_P = 0.50               # loop position used for the static poster
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for block in iter(lambda: handle.read(1 << 20), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def input_paths() -> list[Path]:
+    """Every file whose bytes can change the rendered pixels.
+
+    The bundled fonts are inputs too: swapping a face changes the letterforms,
+    which is exactly the kind of edit that must invalidate the artwork.
+    """
+    paths = [ROOT / name for name in INPUT_FILES]
+    paths += sorted((HERE / "fonts").glob("*.ttf"))
+    return paths
+
+
+def build_stamp() -> dict:
+    """Provenance record for the artwork this build just wrote."""
+    inputs = {str(p.relative_to(ROOT)): _sha256(p) for p in input_paths()}
+    fingerprint = hashlib.sha256(
+        "\n".join(f"{name}:{digest}" for name, digest in sorted(inputs.items())).encode()
+    ).hexdigest()
+    artwork = {}
+    for path in (GIF_OUT, PNG_OUT):
+        artwork[path.name] = {
+            "bytes": path.stat().st_size,
+            "sha256": _sha256(path),
+        }
+    return {
+        "generator": "assets/readme/build_hero.py",
+        "fingerprint": fingerprint,
+        "inputs": inputs,
+        "artwork": artwork,
+        "canvas": [W, H],
+        "frames": FRAMES,
+        "delay_ms": DELAY_MS,
+        "renderer": {"pillow": Image.__version__, "numpy": np.__version__},
+        "note": (
+            "Rendering is not bit-reproducible across Pillow/NumPy/CPU builds; "
+            "this stamp records provenance, not a pixel contract."
+        ),
+    }
+
+
+def write_stamp() -> dict:
+    stamp = build_stamp()
+    STAMP_OUT.write_text(json.dumps(stamp, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return stamp
 
 
 def build_palette(frames: list[Image.Image]) -> Image.Image:
@@ -115,7 +184,14 @@ def encode_gif(frames: list[Image.Image], palette: Image.Image) -> None:
     )
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
+    args = list(sys.argv[1:] if argv is None else argv)
+    if "--stamp-only" in args:
+        # Refresh provenance after a comment-only or dependency-only change
+        # without re-rendering the 200-frame loop.
+        stamp = write_stamp()
+        print(f"wrote {STAMP_OUT.name}  fingerprint {stamp['fingerprint'][:16]}")
+        return 0
     t0 = time.time()
     print(f"YASLOGIST hero render - {W}x{H}, {FRAMES} frames, {FRAMES * DELAY_MS / 1000:.1f}s loop")
     sc = Scene()
@@ -149,6 +225,9 @@ def main() -> int:
 
     for f in (GIF_OUT, PNG_OUT):
         print(f"  wrote {f.name}  {f.stat().st_size / 1024 / 1024:.2f} MB")
+
+    stamp = write_stamp()
+    print(f"  wrote {STAMP_OUT.name}  fingerprint {stamp['fingerprint'][:16]}")
     print(f"done in {time.time() - t0:.1f}s")
     return 0
 

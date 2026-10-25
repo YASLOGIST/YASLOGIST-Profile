@@ -22,6 +22,8 @@ the GIF; without it they are reported as SKIP rather than silently dropped.
 from __future__ import annotations
 
 import argparse
+import hashlib
+import json
 import re
 import struct
 import sys
@@ -38,7 +40,7 @@ SIGNATURE = README_DIR / "yaslogist-signature.png"
 MARK_SVG = README_DIR / "yaslogist-mark.svg"
 SCENE = README_DIR / "scene.py"
 BUILD_HERO = README_DIR / "build_hero.py"
-WORKFLOW = ROOT / ".github" / "workflows" / "verify.yml"
+STAMP = README_DIR / "yaslogist-hero.build.json"
 
 # Regression thresholds derived from the committed artwork. They are not
 # aspirational targets: each one is a little looser than the measured value so
@@ -47,16 +49,13 @@ MIN_FRAME_STD = 5.0          # a blank frame would fall near 0 (measured ~33.5)
 MAX_MEAN_STEP = 1.0          # /255 global brightness change per frame (measured 0.54)
 MAX_MEDIAN_STEP = 0.8        # /255 per pixel (measured 0.43)
 MAX_P95_STEP = 3.5           # /255 per pixel (measured 2.64)
-# Re-rendering a committed frame is only byte-exact under the Pillow build that
-# produced it (glyph antialiasing comes from FreeType). `build_hero.RENDERER_PIN`
-# names that version, so the verifier can tell a genuine drift from a renderer
-# difference instead of guessing with a loose tolerance.
-MAX_REPRODUCE_DIFF = 0.25         # mean channel error, pinned renderer (measured 0.00)
-MAX_REPRODUCE_OUTLIERS = 0.002    # share of pixels off by >8/255, pinned renderer (0.000)
-# Fallback when the installed Pillow is not the pinned one: coarser, but still
-# catches a scene edit or stale artwork (a 6 px globe change measures 1.52 mean).
-MAX_LOOSE_DIFF = 1.0
-MAX_LOOSE_P99 = 30.0              # 95th/99th percentile of the 4x-averaged error
+# Re-rendering the artwork is *not* bit-reproducible across machines (FreeType
+# inside the Pillow wheel, NumPy SIMD paths, palette mapping on near-threshold
+# pixels): frame 100 differs by 0.57/255 between Pillow 11.3 and 13.0, and by
+# 0.72/255 between local Pillow 13.0 and a GitHub runner with the same version.
+# So freshness is verified from a build stamp instead of from pixels. See
+# `check_stamp` and `--probe`.
+MAX_PROBE_DIFF = 3.0   # mean channel error before --probe warns (measured 0.6-0.7)
 
 ASSET_REF = re.compile(r'(?:src|href)="(\.?/?[^"#][^"]*)"|\]\((\.?/[^)\s]+)\)')
 MEDIA_SUFFIXES = {".gif", ".png", ".svg", ".jpg", ".jpeg", ".webp"}
@@ -299,13 +298,6 @@ def parse_gif(path: Path) -> GifFacts:
     return facts
 
 
-def renderer_pin() -> str | None:
-    """The Pillow version the committed artwork was generated with."""
-    text = BUILD_HERO.read_text(encoding="utf-8")
-    match = re.search(r'^RENDERER_PIN\s*=\s*["\']([^"\']+)["\']', text, re.MULTILINE)
-    return match.group(1) if match else None
-
-
 def scene_constants() -> dict[str, tuple[int, int]]:
     """Read the generator's canvas/timing constants without importing scene.
 
@@ -514,39 +506,151 @@ def check_pixels(report: Report, strict: bool) -> None:
     )
 
 
-def check_reproduces_commit(report: Report, index: int = 100) -> None:
-    """Re-render one frame from `scene.py` and compare it with the committed GIF.
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for block in iter(lambda: handle.read(1 << 20), b""):
+            digest.update(block)
+    return digest.hexdigest()
 
-    This is what catches a *stale* artwork file: the generator constants can
-    agree with the GIF while the scene code has moved on. Only one frame is
-    re-rendered (a few seconds), and the render is mapped through the GIF's own
-    palette first, so encoder quantisation is not counted as a difference.
 
-    Byte-exactness is only expected under the pinned Pillow build, because
-    FreeType rasterises the bundled faces differently across versions. On any
-    other version the same comparison runs with a coarser, structural tolerance
-    and says so, rather than either failing on a dependency bump or silently
-    skipping the check.
+def check_stamp(report: Report, facts: GifFacts | None) -> None:
+    """The committed artwork must belong to the current generator sources.
+
+    This is the check that catches stale artwork: edit `scene.py` (or the mark
+    SVG, or a font) without rebuilding the GIF and the stamp no longer matches.
+    It is exact and environment-independent, unlike comparing rendered pixels.
+    """
+    if not STAMP.is_file():
+        report.fail("artwork.stamp", f"missing {STAMP.relative_to(ROOT)} — run "
+                                     f"assets/readme/build_hero.py")
+        return
+    try:
+        stamp = json.loads(STAMP.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        report.fail("artwork.stamp", f"unreadable stamp: {exc}")
+        return
+
+    inputs = stamp.get("inputs")
+    if not isinstance(inputs, dict) or not inputs:
+        report.fail("artwork.stamp", "stamp records no input hashes")
+        return
+
+    stale = []
+    missing = []
+    for name, digest in sorted(inputs.items()):
+        path = ROOT / name
+        if not path.is_file():
+            missing.append(name)
+        elif _sha256(path) != digest:
+            stale.append(name)
+    report.check(
+        "artwork.stamp",
+        not stale and not missing,
+        "artwork was built from the current sources"
+        if not stale and not missing
+        else f"stale inputs: {', '.join(stale + missing)} — rebuild with "
+             f"assets/readme/build_hero.py",
+    )
+
+    # The stamp describes the artwork that exists now, not one that has been
+    # replaced or hand-edited since.
+    problems = []
+    for name, recorded in sorted((stamp.get("artwork") or {}).items()):
+        path = README_DIR / name
+        if not path.is_file():
+            problems.append(f"{name} missing")
+            continue
+        if path.stat().st_size != recorded.get("bytes"):
+            problems.append(f"{name} size {path.stat().st_size} != {recorded.get('bytes')}")
+        elif _sha256(path) != recorded.get("sha256"):
+            problems.append(f"{name} hash changed")
+    report.check(
+        "artwork.stamp_files",
+        not problems,
+        "committed artwork matches its build stamp"
+        if not problems
+        else "; ".join(problems) + " — rebuild rather than hand-editing artwork",
+    )
+
+    renderer = stamp.get("renderer") or {}
+    report.ok(
+        "artwork.provenance",
+        f"built with Pillow {renderer.get('pillow', '?')} / NumPy "
+        f"{renderer.get('numpy', '?')}; {len(inputs)} hashed input(s)",
+    )
+    if facts is not None:
+        canvas = tuple(stamp.get("canvas") or ())
+        report.check(
+            "artwork.stamp_timing",
+            canvas == facts.canvas
+            and stamp.get("frames") == facts.frames
+            and stamp.get("delay_ms") == facts.uniform_delay,
+            f"stamp says {canvas}, {stamp.get('frames')} frames @ "
+            f"{stamp.get('delay_ms')} ms; GIF is {facts.canvas}, {facts.frames} @ "
+            f"{facts.uniform_delay} ms",
+        )
+
+
+def check_scene_determinism(report: Report, index: int = 0) -> None:
+    """The scene must render the same pixels twice in the same process.
+
+    The artwork's loop, palette and motion all assume a deterministic scene; an
+    unseeded random call or set iteration would break that silently.
     """
     try:
         import numpy as np
         from PIL import Image
     except ImportError:
-        report.skip("hero.reproduces", "Pillow and NumPy are required")
+        report.skip("scene.deterministic", "Pillow and NumPy are required")
         return
     sys.path.insert(0, str(README_DIR))
     try:
         import scene
-    except Exception as exc:  # pragma: no cover - dependency problems
-        report.skip("hero.reproduces", f"cannot import scene.py: {exc}")
+    except Exception as exc:  # pragma: no cover
+        report.skip("scene.deterministic", f"cannot import scene.py: {exc}")
         return
 
-    constants = scene_constants()
-    frames = constants.get("FRAMES,DELAY", (0, 0))[0]
+    frames = scene_constants().get("FRAMES,DELAY", (0, 0))[0]
+    if not frames:
+        report.fail("scene.deterministic", "scene.py has no usable FRAMES")
+        return
+    p = (index % frames) / frames
+    first = np.asarray(scene.Scene().frame(p))
+    second = np.asarray(scene.Scene().frame(p))
+    same = np.array_equal(first, second)
+    report.check(
+        "scene.deterministic",
+        same,
+        f"frame {index} rendered twice on Pillow {Image.__version__}: "
+        + ("identical" if same else f"{int((first != second).sum())} differing bytes"),
+    )
+
+
+def probe_render(report: Report, index: int) -> None:
+    """Report how far a fresh render is from the committed frame (informational).
+
+    Never a pass/fail gate: the difference is dominated by the renderer build,
+    so a threshold here would fail on dependency changes rather than on real
+    regressions. It is still useful right after a rebuild.
+    """
+    try:
+        import numpy as np
+        from PIL import Image
+    except ImportError:
+        report.skip("probe.render", "Pillow and NumPy are required")
+        return
+    sys.path.insert(0, str(README_DIR))
+    try:
+        import scene
+    except Exception as exc:  # pragma: no cover
+        report.skip("probe.render", f"cannot import scene.py: {exc}")
+        return
+
+    frames = scene_constants().get("FRAMES,DELAY", (0, 0))[0]
     if not frames or not 0 <= index < frames:
-        report.fail("hero.reproduces", f"frame {index} is outside the loop")
+        report.fail("probe.render", f"frame {index} is outside the loop")
         return
-
     rendered = scene.Scene().frame(index / frames)
     with Image.open(HERO) as hero:
         hero.seek(0)
@@ -554,64 +658,16 @@ def check_reproduces_commit(report: Report, index: int = 100) -> None:
         palette.putpalette(hero.getpalette())
         hero.seek(index)
         committed = np.asarray(hero.convert("RGB"), dtype=np.int16)
-
     mapped = rendered.quantize(palette=palette, dither=Image.Dither.NONE).convert("RGB")
     delta = np.abs(np.asarray(mapped, dtype=np.int16) - committed)
     mean = float(delta.mean())
-    outliers = float((delta.max(axis=2) > 8).mean())
-
-    pin = renderer_pin()
-    installed = Image.__version__
-    pinned = pin is not None and installed == pin
-    if pinned:
-        ok = mean <= MAX_REPRODUCE_DIFF and outliers <= MAX_REPRODUCE_OUTLIERS
-        budget = f"limits {MAX_REPRODUCE_DIFF:g}/255 mean, {MAX_REPRODUCE_OUTLIERS * 100:g}% outliers"
+    detail = (f"frame {index}: mean Δ {mean:.2f}/255, "
+              f"{(delta.max(axis=2) > 8).mean() * 100:.2f}% of pixels off by >8/255 "
+              f"(Pillow {Image.__version__})")
+    if mean > MAX_PROBE_DIFF:
+        report.warn(f"probe.render {detail} — larger than renderer noise usually explains")
     else:
-        # Downsample by 4 before looking at the tail: renderer differences are
-        # thin type edges, whereas moved geometry survives averaging.
-        h, w = delta.shape[0] // 4 * 4, delta.shape[1] // 4 * 4
-        coarse = delta[:h, :w].reshape(h // 4, 4, w // 4, 4, 3).mean(axis=(1, 3))
-        p99 = float(np.percentile(coarse, 99))
-        mean = max(mean, 0.0)
-        ok = mean <= MAX_LOOSE_DIFF and p99 <= MAX_LOOSE_P99
-        budget = (f"structural limits {MAX_LOOSE_DIFF:g}/255 mean, "
-                  f"p99 {MAX_LOOSE_P99:g} (coarse)")
-        report.warn(
-            f"hero.reproduces ran on Pillow {installed}, but the artwork was "
-            f"generated with {pin or 'an unknown version'}: compared structurally "
-            f"instead of byte-for-byte"
-        )
-    report.check(
-        "hero.reproduces",
-        ok,
-        f"frame {index} re-rendered from scene.py vs committed GIF: mean "
-        f"Δ {mean:.2f}/255, {outliers * 100:.2f}% of pixels off by >8/255 "
-        f"({budget}; Pillow {installed}, pinned {pin or 'n/a'})",
-    )
-
-
-def check_renderer_pin(report: Report) -> None:
-    """CI must install the renderer the artwork was generated with.
-
-    If the two drift apart the reproduction check silently degrades to its
-    structural fallback, which would quietly weaken the guarantee the README
-    makes. Cheaper to fail here than to notice months later.
-    """
-    pin = renderer_pin()
-    if pin is None:
-        report.fail("workflow.renderer_pin", "build_hero.py has no RENDERER_PIN")
-        return
-    if not WORKFLOW.is_file():
-        report.skip("workflow.renderer_pin", "no CI workflow in this checkout")
-        return
-    text = WORKFLOW.read_text(encoding="utf-8")
-    pins = set(re.findall(r'Pillow==([0-9][0-9A-Za-z.\-]*)', text))
-    report.check(
-        "workflow.renderer_pin",
-        pins == {pin},
-        f"workflow installs Pillow {', '.join(sorted(pins)) or 'unpinned'}; "
-        f"artwork pinned to {pin}",
-    )
+        report.ok("probe.render", detail)
 
 
 def check_stills(report: Report) -> None:
@@ -628,21 +684,22 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--quiet", action="store_true", help="only failures and warnings")
     parser.add_argument("--strict", action="store_true",
                         help="treat missing optional dependencies as failures")
-    parser.add_argument("--reproduce", nargs="?", type=int, const=100, default=None,
+    parser.add_argument("--probe", nargs="?", type=int, const=100, default=None,
                         metavar="FRAME",
-                        help="re-render one frame from scene.py and compare it with the "
-                             "committed GIF (slow: needs Pillow and NumPy)")
+                        help="re-render one frame and report how far it is from the "
+                             "committed GIF (informational, never a pass/fail gate)")
     args = parser.parse_args(argv)
 
     report = Report()
     check_readme_refs(report)
-    check_gif_structure(report)
+    facts = check_gif_structure(report)
     check_stills(report)
     check_mark(report)
-    check_renderer_pin(report)
+    check_stamp(report, facts)
+    check_scene_determinism(report)
     check_pixels(report, args.strict)
-    if args.reproduce is not None:
-        check_reproduces_commit(report, args.reproduce)
+    if args.probe is not None:
+        probe_render(report, args.probe)
 
     print("YASLOGIST profile asset verification")
     print(report.render(quiet=args.quiet))

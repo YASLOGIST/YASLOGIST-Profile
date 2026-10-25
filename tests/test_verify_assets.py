@@ -7,7 +7,10 @@ discover -s tests` alone is enough to know the profile assets are intact.
 from __future__ import annotations
 
 import importlib.util
+import json
+import shutil
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -86,52 +89,49 @@ class VerifyAssetsTest(unittest.TestCase):
         refs = verify_assets.readme_asset_refs(text)
         self.assertEqual(refs, ["assets/local.png", "assets/other.gif"])
 
-    def test_committed_gif_still_matches_its_generator(self) -> None:
-        """Re-render one frame and compare it with the committed artwork."""
-        missing = [
-            module for module in ("PIL", "numpy", "scene")
-            if importlib.util.find_spec(module) is None
-        ]
-        if missing:
-            self.skipTest(f"render dependencies not installed: {', '.join(missing)}")
-
+    def test_build_stamp_matches_the_current_sources(self) -> None:
+        """The committed artwork must belong to the current generator sources."""
         report = verify_assets.Report()
-        verify_assets.check_reproduces_commit(report, index=37)
-        self.assertEqual(
-            [f"{name}: {detail}" for name, _, detail in report.failures], [],
-            "the committed hero no longer reproduces from scene.py",
-        )
-        self.assertIn("hero.reproduces", [c[0] for c in report.checks])
-
-    def test_renderer_pin_is_declared_and_used_by_ci(self) -> None:
-        """The pinned Pillow must exist, look like a version, and be what CI installs."""
-        pin = verify_assets.renderer_pin()
-        self.assertIsNotNone(pin, "build_hero.py must declare RENDERER_PIN")
-        self.assertRegex(pin, r"^\d+\.\d+\.\d+$")
-
-        report = verify_assets.Report()
-        verify_assets.check_renderer_pin(report)
+        facts = verify_assets.parse_gif(verify_assets.HERO)
+        verify_assets.check_stamp(report, facts)
         self.assertEqual([f"{n}: {d}" for n, _, d in report.failures], [])
-        self.assertNotIn("workflow.renderer_pin", [c[0] for c in report.skips])
 
-    def test_reproduction_reports_which_tolerance_was_used(self) -> None:
-        import importlib.util
+    def test_stamp_notices_a_changed_source(self) -> None:
+        """A source edit without a rebuild must be reported as stale."""
+        victim = "assets/readme/scene.py"
 
+        original = verify_assets.ROOT / victim
+        with tempfile.TemporaryDirectory() as tmp:
+            backup = Path(tmp) / "scene.py"
+            shutil.copy2(original, backup)
+            try:
+                original.write_text(original.read_text(encoding="utf-8") + "\n")
+                report = verify_assets.Report()
+                verify_assets.check_stamp(report, None)
+                self.assertIn("artwork.stamp", [n for n, _, _ in report.failures])
+                self.assertIn(victim, report.failures[0][2])
+            finally:
+                shutil.copy2(backup, original)
+
+    def test_stamp_records_provenance_and_timing(self) -> None:
+        stamp = json.loads(verify_assets.STAMP.read_text(encoding="utf-8"))
+        self.assertEqual(stamp["canvas"], [1920, 720])
+        self.assertEqual(stamp["frames"], 200)
+        self.assertEqual(stamp["delay_ms"], 50)
+        self.assertIn("pillow", stamp["renderer"])
+        self.assertRegex(stamp["fingerprint"], r"^[0-9a-f]{64}$")
+        self.assertIn("assets/readme/scene.py", stamp["inputs"])
+        self.assertIn("assets/readme/yaslogist-mark.svg", stamp["inputs"])
+        # Fonts change the letterforms, so they are inputs too.
+        self.assertTrue(any(p.endswith(".ttf") for p in stamp["inputs"]))
+
+    def test_probe_is_informational_not_a_gate(self) -> None:
         if importlib.util.find_spec("PIL") is None or importlib.util.find_spec("numpy") is None:
             self.skipTest("Pillow and NumPy are not installed")
-        from PIL import Image
-
         report = verify_assets.Report()
-        verify_assets.check_reproduces_commit(report, index=37)
-        self.assertEqual([f"{n}: {d}" for n, _, d in report.failures], [])
-        detail = dict((name, text) for name, _, text in report.checks)["hero.reproduces"]
-        self.assertIn(f"Pillow {Image.__version__}", detail)
-        pinned = verify_assets.renderer_pin()
-        if Image.__version__ == pinned:
-            self.assertNotIn("structural limits", detail)
-        else:
-            self.assertIn("structural limits", detail)
-            self.assertTrue(report.warnings)
+        verify_assets.probe_render(report, index=5)
+        self.assertEqual(report.failures, [])
+        self.assertTrue(any(c[0] in ("probe.render",) for c in report.checks + report.skips))
 
     def test_scene_constants_are_parsed(self) -> None:
         constants = verify_assets.scene_constants()

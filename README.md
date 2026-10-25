@@ -154,7 +154,8 @@ assets/yaslogist-*.{gif,png}   earlier hero artwork in a retired identity — ke
 assets/readme/                 committed hero, poster, signal, signature, mark SVG, fonts
   mark.py                      parses the YL mark SVG — the only copy of the glyph geometry
   scene.py                     procedural scene (Pillow + NumPy)
-  build_hero.py                renders the committed hero GIF and poster
+  build_hero.py                renders the committed hero GIF/poster + build stamp
+  yaslogist-hero.build.json    provenance stamp: input hashes + artwork hashes
 tools/verify_assets.py         asset + README verifier (this is the check CI runs)
 tests/                        unittest suite for the mark parser, render and verifier
 ```
@@ -170,8 +171,10 @@ These rows are produced by `python3 tools/verify_assets.py` against the committe
 | :--- | :--- |
 | Hero structure | GIF89a, 1920 × 720 canvas, 200 frames, trailer intact, no trailing bytes |
 | Timing | Uniform 50 ms per frame → 10.00 s loop, `loop=0` (infinite) |
-| Generator agreement | `scene.py` (`W`, `H`, `FRAMES`, `DELAY_MS`) matches the committed GIF exactly |
-| Artwork freshness | Frame 100 re-rendered from `scene.py` and mapped through the GIF's own palette reproduces the committed frame — mean channel Δ 0.00/255, no pixel off by more than 8/255, so the committed artwork is not stale. Byte-exactness is only expected under the pinned Pillow (see below); on any other build the same comparison runs with a structural tolerance instead of failing |
+| Generator agreement | `scene.py` (`W`, `H`, `FRAMES`, `DELAY_MS`) matches the committed GIF exactly, and the build stamp agrees with the GIF's canvas, frame count and frame delay |
+| Artwork freshness | `assets/readme/yaslogist-hero.build.json` records a SHA-256 of every input that can change the pixels (`scene.py`, `mark.py`, `build_hero.py`, the mark SVG, all five bundled fonts) plus the size and hash of the artwork itself. The verifier recomputes them: editing a source without rebuilding fails as *stale*, and hand-editing or replacing the GIF/PNG fails as *not the output of that build* |
+| Scene determinism | The scene renders a frame twice in one process and produces identical pixels, so the loop and static plates rest on a deterministic scene |
+| Provenance | The stamp records the renderer that produced the file (Pillow / NumPy version) — informational, never a pin |
 | Palette | One 256-colour table shared by all 200 frames — byte-identical local tables |
 | Frame placement | Every frame rectangle fits inside the canvas |
 | Hero decodes | 200 frames decoded, no corrupt or blank frame (per-frame luminance std 33.5–34.1) |
@@ -193,11 +196,11 @@ The motion is baked into local GIFs for reliable GitHub display. To rebuild it, 
 
 ```bash
 python3 -m venv ~/.venvs/yaslogist-readme
-~/.venvs/yaslogist-readme/bin/python -m pip install "Pillow==13.0.0" numpy
+~/.venvs/yaslogist-readme/bin/python -m pip install Pillow numpy
 ~/.venvs/yaslogist-readme/bin/python assets/readme/build_hero.py
 ```
 
-Install the Pillow version named by `RENDERER_PIN` in `build_hero.py` if you want the rebuilt artwork to be byte-identical to the committed file; a different Pillow produces a visually equivalent but not identical render, and `tools/verify_assets.py --reproduce` will then compare structurally rather than exactly.
+A rebuild produces a visually equivalent but not byte-identical render on a different machine; that is expected, and the build stamp records which renderer produced the committed file.
 
 `build_hero.py` writes only to `assets/readme/`, needs no network access, and uses Pillow's own GIF encoder — there is no ImageMagick or other external post-processing step, because re-quantising an already-optimal GIF risks damaging the letterforms for a marginal gain. Fonts are committed under `assets/readme/fonts/`, so the build is reproducible offline. The virtual environment is local build tooling only; the profile renderer does not use it.
 
@@ -217,8 +220,8 @@ Everything here is Python 3.11+ and needs no network access.
 python3 -m pip install Pillow          # optional; without it those rows report SKIP
 python3 tools/verify_assets.py
 python3 tools/verify_assets.py --strict   # fail instead of SKIP when Pillow is missing
-python3 tools/verify_assets.py --reproduce  # also re-render frame 100 and diff it
-                                             # against the committed GIF (Pillow + NumPy)
+python3 tools/verify_assets.py --probe      # also re-render frame 100 and report the
+                                             # difference (informational; Pillow + NumPy)
 
 # unit tests: mark parser, render-vs-vector geometry, verifier itself
 python3 -m unittest discover -s tests -t .
@@ -229,9 +232,11 @@ python3 -m py_compile assets/readme/build_hero.py assets/readme/scene.py \
 git diff --check
 ```
 
-`--reproduce` is the check that notices a *stale* artwork file — a hero GIF nobody regenerated after editing the scene. It renders one frame, maps it through the committed palette and diffs it, which takes a few seconds; CI runs it on every push.
+**Freshness is verified from the build stamp, not from pixels.** Rendering this scene is *not* bit-reproducible across machines: glyph antialiasing comes from FreeType inside the Pillow wheel, float paths in NumPy vary with SIMD dispatch, and palette mapping flips on near-threshold pixels. Measured on the committed artwork, re-rendering frame 100 differs by **0.57/255** mean between Pillow 11.3 and 13.0, and by **0.72/255** between a local Pillow 13.0 and a GitHub runner running the same version — the same magnitude as a small art edit, so a pixel-equality gate would fail on dependency changes and pass on real ones. The stamp avoids that entirely: it is exact when it should be, and it targets the failure that actually happens (edit the scene, forget to rebuild).
 
-Glyph antialiasing comes from FreeType, so the artwork is **byte-reproducible only under the Pillow build that generated it**. That version is pinned as `RENDERER_PIN` in `assets/readme/build_hero.py` (currently `13.0.0`) and installed explicitly in CI; the verifier fails if the two drift apart. On a different Pillow it says so and compares structurally — mean error ≤ 1/255 and a 99th-percentile error ≤ 30 on a 4× averaged image — which still catches a moved element (a 6 px globe radius change measures 1.52/255) without failing on antialiasing noise (0.57/255 between Pillow 11 and 13).
+`--probe [FRAME]` re-renders one frame and reports the difference against the committed GIF for a human to read — useful immediately after a rebuild. It is informational and never a pass/fail gate.
+
+If you change anything the artwork is drawn from, rebuild it — `assets/readme/build_hero.py` writes the GIF, the poster and the stamp in one run. `--stamp-only` refreshes the stamp without re-rendering the loop, which is only correct when the pixels cannot have changed (a comment edit).
 
 `tools/verify_assets.py` fails the build on a missing asset path, a truncated or mistimed GIF, frames that disagree on palette, a blank frame, a broken loop seam, a brightness jump between frames, or a `scene.py` constant that no longer matches the committed artwork. Media that is committed but no longer referenced by the README is reported as a warning, not a failure, so legacy artwork can stay without blocking a change; the two retired hero files are declared explicitly in the verifier, which keeps the warning actionable for anything new.
 
