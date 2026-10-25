@@ -53,7 +53,24 @@ jobs:
             tools/verify_assets.py
 
       - name: Verify committed assets against README.md
-        run: python tools/verify_assets.py --strict --reproduce
+        run: |
+          set +e
+          python tools/verify_assets.py --strict --reproduce | tee verify.log
+          rc=${PIPESTATUS[0]}
+          if [ "$rc" -ne 0 ]; then
+            # Failures are re-emitted as annotations: a red X in the PR is not
+            # much use without the line that failed, and annotations are
+            # readable from the API as well as the web UI.
+            python - <<'PY'
+            import pathlib
+
+            lines = pathlib.Path("verify.log").read_text(errors="replace").splitlines()
+            keep = [ln for ln in lines if "FAIL" in ln or "Error" in ln or "Traceback" in ln]
+            for line in (keep or lines[-12:])[:12]:
+                print("::error::" + line.replace("%", "%25").replace("\r", "%0D"))
+            PY
+            exit "$rc"
+          fi
 
       - name: Unit tests
         run: python -m unittest discover -s tests -t . -v
