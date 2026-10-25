@@ -47,6 +47,18 @@ from scene import DELAY_MS, FRAMES, H, W, Scene  # noqa: E402
 GIF_OUT = HERE / "yaslogist-hero.gif"
 PNG_OUT = HERE / "yaslogist-hero.png"
 
+# The committed artwork is byte-reproducible only with the Pillow build that
+# produced it: glyph antialiasing comes from FreeType, and Pillow 11 and 13 do
+# not rasterise the bundled Inter/JetBrains faces identically (~0.6/255 mean
+# difference across the frame, concentrated on type edges). This pin is the
+# version under which `tools/verify_assets.py --reproduce` matches the
+# committed GIF exactly.
+#
+# If you regenerate the artwork with a different Pillow, update this string in
+# the same commit - the verifier reads it to decide whether an exact match is
+# even achievable, and falls back to a structural comparison otherwise.
+RENDERER_PIN = "13.0.0"
+
 PALETTE_SAMPLES = 16          # frames averaged into the single global palette
 PALETTE_COLORS = 254          # single shared palette; the brand wordmark
                               # needs the full range to stay pristine

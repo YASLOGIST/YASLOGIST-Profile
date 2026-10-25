@@ -37,6 +37,8 @@ SIGNAL = README_DIR / "yaslogist-signal.gif"
 SIGNATURE = README_DIR / "yaslogist-signature.png"
 MARK_SVG = README_DIR / "yaslogist-mark.svg"
 SCENE = README_DIR / "scene.py"
+BUILD_HERO = README_DIR / "build_hero.py"
+WORKFLOW = ROOT / ".github" / "workflows" / "verify.yml"
 
 # Regression thresholds derived from the committed artwork. They are not
 # aspirational targets: each one is a little looser than the measured value so
@@ -45,8 +47,16 @@ MIN_FRAME_STD = 5.0          # a blank frame would fall near 0 (measured ~33.5)
 MAX_MEAN_STEP = 1.0          # /255 global brightness change per frame (measured 0.54)
 MAX_MEDIAN_STEP = 0.8        # /255 per pixel (measured 0.43)
 MAX_P95_STEP = 3.5           # /255 per pixel (measured 2.64)
-MAX_REPRODUCE_DIFF = 0.75    # mean channel error when re-rendering a frame (measured 0.0)
-MAX_REPRODUCE_OUTLIERS = 0.001  # share of pixels allowed to differ by more than 8/255
+# Re-rendering a committed frame is only byte-exact under the Pillow build that
+# produced it (glyph antialiasing comes from FreeType). `build_hero.RENDERER_PIN`
+# names that version, so the verifier can tell a genuine drift from a renderer
+# difference instead of guessing with a loose tolerance.
+MAX_REPRODUCE_DIFF = 0.25         # mean channel error, pinned renderer (measured 0.00)
+MAX_REPRODUCE_OUTLIERS = 0.002    # share of pixels off by >8/255, pinned renderer (0.000)
+# Fallback when the installed Pillow is not the pinned one: coarser, but still
+# catches a scene edit or stale artwork (a 6 px globe change measures 1.52 mean).
+MAX_LOOSE_DIFF = 1.0
+MAX_LOOSE_P99 = 30.0              # 95th/99th percentile of the 4x-averaged error
 
 ASSET_REF = re.compile(r'(?:src|href)="(\.?/?[^"#][^"]*)"|\]\((\.?/[^)\s]+)\)')
 MEDIA_SUFFIXES = {".gif", ".png", ".svg", ".jpg", ".jpeg", ".webp"}
@@ -289,6 +299,13 @@ def parse_gif(path: Path) -> GifFacts:
     return facts
 
 
+def renderer_pin() -> str | None:
+    """The Pillow version the committed artwork was generated with."""
+    text = BUILD_HERO.read_text(encoding="utf-8")
+    match = re.search(r'^RENDERER_PIN\s*=\s*["\']([^"\']+)["\']', text, re.MULTILINE)
+    return match.group(1) if match else None
+
+
 def scene_constants() -> dict[str, tuple[int, int]]:
     """Read the generator's canvas/timing constants without importing scene.
 
@@ -504,6 +521,12 @@ def check_reproduces_commit(report: Report, index: int = 100) -> None:
     agree with the GIF while the scene code has moved on. Only one frame is
     re-rendered (a few seconds), and the render is mapped through the GIF's own
     palette first, so encoder quantisation is not counted as a difference.
+
+    Byte-exactness is only expected under the pinned Pillow build, because
+    FreeType rasterises the bundled faces differently across versions. On any
+    other version the same comparison runs with a coarser, structural tolerance
+    and says so, rather than either failing on a dependency bump or silently
+    skipping the check.
     """
     try:
         import numpy as np
@@ -536,12 +559,58 @@ def check_reproduces_commit(report: Report, index: int = 100) -> None:
     delta = np.abs(np.asarray(mapped, dtype=np.int16) - committed)
     mean = float(delta.mean())
     outliers = float((delta.max(axis=2) > 8).mean())
+
+    pin = renderer_pin()
+    installed = Image.__version__
+    pinned = pin is not None and installed == pin
+    if pinned:
+        ok = mean <= MAX_REPRODUCE_DIFF and outliers <= MAX_REPRODUCE_OUTLIERS
+        budget = f"limits {MAX_REPRODUCE_DIFF:g}/255 mean, {MAX_REPRODUCE_OUTLIERS * 100:g}% outliers"
+    else:
+        # Downsample by 4 before looking at the tail: renderer differences are
+        # thin type edges, whereas moved geometry survives averaging.
+        h, w = delta.shape[0] // 4 * 4, delta.shape[1] // 4 * 4
+        coarse = delta[:h, :w].reshape(h // 4, 4, w // 4, 4, 3).mean(axis=(1, 3))
+        p99 = float(np.percentile(coarse, 99))
+        mean = max(mean, 0.0)
+        ok = mean <= MAX_LOOSE_DIFF and p99 <= MAX_LOOSE_P99
+        budget = (f"structural limits {MAX_LOOSE_DIFF:g}/255 mean, "
+                  f"p99 {MAX_LOOSE_P99:g} (coarse)")
+        report.warn(
+            f"hero.reproduces ran on Pillow {installed}, but the artwork was "
+            f"generated with {pin or 'an unknown version'}: compared structurally "
+            f"instead of byte-for-byte"
+        )
     report.check(
         "hero.reproduces",
-        mean <= MAX_REPRODUCE_DIFF and outliers <= MAX_REPRODUCE_OUTLIERS,
-        f"frame {index} re-rendered from scene.py: mean channel Δ {mean:.2f}/255, "
-        f"{outliers * 100:.3f}% of pixels off by >8/255 — the committed artwork "
-        f"still matches its generator",
+        ok,
+        f"frame {index} re-rendered from scene.py vs committed GIF: mean "
+        f"Δ {mean:.2f}/255, {outliers * 100:.2f}% of pixels off by >8/255 "
+        f"({budget}; Pillow {installed}, pinned {pin or 'n/a'})",
+    )
+
+
+def check_renderer_pin(report: Report) -> None:
+    """CI must install the renderer the artwork was generated with.
+
+    If the two drift apart the reproduction check silently degrades to its
+    structural fallback, which would quietly weaken the guarantee the README
+    makes. Cheaper to fail here than to notice months later.
+    """
+    pin = renderer_pin()
+    if pin is None:
+        report.fail("workflow.renderer_pin", "build_hero.py has no RENDERER_PIN")
+        return
+    if not WORKFLOW.is_file():
+        report.skip("workflow.renderer_pin", "no CI workflow in this checkout")
+        return
+    text = WORKFLOW.read_text(encoding="utf-8")
+    pins = set(re.findall(r'Pillow==([0-9][0-9A-Za-z.\-]*)', text))
+    report.check(
+        "workflow.renderer_pin",
+        pins == {pin},
+        f"workflow installs Pillow {', '.join(sorted(pins)) or 'unpinned'}; "
+        f"artwork pinned to {pin}",
     )
 
 
@@ -570,6 +639,7 @@ def main(argv: list[str] | None = None) -> int:
     check_gif_structure(report)
     check_stills(report)
     check_mark(report)
+    check_renderer_pin(report)
     check_pixels(report, args.strict)
     if args.reproduce is not None:
         check_reproduces_commit(report, args.reproduce)

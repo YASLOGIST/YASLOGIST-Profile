@@ -103,6 +103,36 @@ class VerifyAssetsTest(unittest.TestCase):
         )
         self.assertIn("hero.reproduces", [c[0] for c in report.checks])
 
+    def test_renderer_pin_is_declared_and_used_by_ci(self) -> None:
+        """The pinned Pillow must exist, look like a version, and be what CI installs."""
+        pin = verify_assets.renderer_pin()
+        self.assertIsNotNone(pin, "build_hero.py must declare RENDERER_PIN")
+        self.assertRegex(pin, r"^\d+\.\d+\.\d+$")
+
+        report = verify_assets.Report()
+        verify_assets.check_renderer_pin(report)
+        self.assertEqual([f"{n}: {d}" for n, _, d in report.failures], [])
+        self.assertNotIn("workflow.renderer_pin", [c[0] for c in report.skips])
+
+    def test_reproduction_reports_which_tolerance_was_used(self) -> None:
+        import importlib.util
+
+        if importlib.util.find_spec("PIL") is None or importlib.util.find_spec("numpy") is None:
+            self.skipTest("Pillow and NumPy are not installed")
+        from PIL import Image
+
+        report = verify_assets.Report()
+        verify_assets.check_reproduces_commit(report, index=37)
+        self.assertEqual([f"{n}: {d}" for n, _, d in report.failures], [])
+        detail = dict((name, text) for name, _, text in report.checks)["hero.reproduces"]
+        self.assertIn(f"Pillow {Image.__version__}", detail)
+        pinned = verify_assets.renderer_pin()
+        if Image.__version__ == pinned:
+            self.assertNotIn("structural limits", detail)
+        else:
+            self.assertIn("structural limits", detail)
+            self.assertTrue(report.warnings)
+
     def test_scene_constants_are_parsed(self) -> None:
         constants = verify_assets.scene_constants()
         self.assertEqual(constants["W,H"], (1920, 720))
