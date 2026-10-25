@@ -62,14 +62,9 @@ jobs:
             # Re-emit the failing lines as annotations: a red X is not much use
             # without the line that failed, and annotations are readable from
             # the API as well as the web UI.
-            python - <<'PY'
-            import pathlib
-
-            lines = pathlib.Path("verify.log").read_text(errors="replace").splitlines()
-            keep = [ln for ln in lines if "FAIL" in ln or "Error" in ln or "Traceback" in ln]
-            for line in (keep or lines[-12:])[:12]:
-                print("::error::" + line.replace("%", "%25").replace("\r", "%0D"))
-            PY
+            grep -E 'FAIL|Traceback|[Ee]rror' verify.log | head -12 | while IFS= read -r line; do
+              echo "::error::$line"
+            done
           fi
           exit "$rc"
 
