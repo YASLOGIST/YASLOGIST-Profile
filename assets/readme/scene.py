@@ -17,10 +17,20 @@ that way on screen.
 from __future__ import annotations
 
 import math
+import sys
 from pathlib import Path
 
 import numpy as np
 from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
+
+# The mark parser is a sibling module with no third-party imports. Put this
+# directory on the path so `import scene` works regardless of the caller's cwd
+# (`build_hero.py` also does this before importing the scene).
+_HERE = Path(__file__).resolve().parent
+if str(_HERE) not in sys.path:
+    sys.path.insert(0, str(_HERE))
+
+from mark import DEFAULT_MARK, load_mark  # noqa: E402
 
 # --------------------------------------------------------------------------
 # Canvas / timing
@@ -547,23 +557,22 @@ def conduit_path(steps=90):
 def build_core_mark(radius: float = 112.0) -> Image.Image:
     """The official circular YL mark.
 
-    The two glyph paths are the repository's own logo geometry
-    (assets/readme/yaslogist-mark.svg, viewBox 0 0 512 512) - preserved,
-    not redrawn.
+    Glyph geometry is parsed from the repository's own vector master
+    (`assets/readme/yaslogist-mark.svg`) at call time via `mark.py`, so the
+    hero can never drift from the master file and there is no second copy of
+    the logo to keep in sync. Drawing is unchanged from the previous
+    hard-coded coordinates; `tests/test_scene_mark.py` pins that equivalence.
     """
+    geometry = load_mark(DEFAULT_MARK)
+    scaled = geometry.scaled(radius)
     sh, sw = (H + MARGIN * 2) * SS, (W + MARGIN * 2) * SS
     layer = Image.new("RGBA", (sw, sh), (0, 0, 0, 0))
     d = ImageDraw.Draw(layer, "RGBA")
-    scale = radius / 238.0
     cx, cy = (MARGIN + GLOBE_CX) * SS, (MARGIN + GLOBE_CY) * SS
     r = radius * SS
 
-    def pts(path):
-        return [(cx + (x - 256) * scale * SS, cy + (y - 256) * scale * SS) for x, y in path]
-
-    Y_PATH = [(98, 126), (132, 98), (218, 213), (305, 98), (342, 126), (244, 253),
-              (243, 413), (195, 413), (195, 258)]
-    L_PATH = [(344, 138), (344, 357), (440, 357), (440, 371), (417, 395), (297, 395), (297, 204)]
+    def pts(index):
+        return [(cx + x * SS, cy + y * SS) for x, y in scaled.polygon(index)]
 
     # Housing disc with a soft interior gradient, then rim, then glyphs.
     housing = Image.new("RGB", (int(r * 2) + 2, int(r * 2) + 2), (0, 0, 0))
@@ -578,12 +587,14 @@ def build_core_mark(radius: float = 112.0) -> Image.Image:
     ImageDraw.Draw(mask).ellipse([0, 0, housing.width - 1, housing.height - 1], fill=255)
     layer.paste(housing, (int(cx - r), int(cy - r)), mask)
 
+    # The SVG's 16-unit stroke is centred on the ring path; Pillow grows an
+    # ellipse outline inward, so half the stroke lands on the same pixels.
     d.ellipse([cx - r, cy - r, cx + r, cy + r], outline=fade(INK, 0.95),
-              width=max(2, int(round(8 * scale * SS))))
+              width=max(2, int(round(scaled.stroke_width * 0.5 * SS))))
     d.ellipse([cx - r * 1.088, cy - r * 1.088, cx + r * 1.088, cy + r * 1.088],
               outline=fade(TEAL_MUTE, 0.40), width=max(1, int(round(1.2 * SS))))
-    d.polygon(pts(Y_PATH), fill=fade(INK, 1.0))
-    d.polygon(pts(L_PATH), fill=fade(INK, 1.0))
+    for index in range(len(geometry.polygons)):
+        d.polygon(pts(index), fill=fade(INK, 1.0))
     return layer
 
 
