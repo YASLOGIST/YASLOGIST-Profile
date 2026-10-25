@@ -55,12 +55,13 @@ jobs:
       - name: Verify committed assets against README.md
         run: |
           set +e
-          python tools/verify_assets.py --strict --reproduce | tee verify.log
-          rc=${PIPESTATUS[0]}
+          python tools/verify_assets.py --strict --reproduce > verify.log 2>&1
+          rc=$?
+          cat verify.log
           if [ "$rc" -ne 0 ]; then
-            # Failures are re-emitted as annotations: a red X in the PR is not
-            # much use without the line that failed, and annotations are
-            # readable from the API as well as the web UI.
+            # Re-emit the failing lines as annotations: a red X is not much use
+            # without the line that failed, and annotations are readable from
+            # the API as well as the web UI.
             python - <<'PY'
             import pathlib
 
@@ -69,8 +70,8 @@ jobs:
             for line in (keep or lines[-12:])[:12]:
                 print("::error::" + line.replace("%", "%25").replace("\r", "%0D"))
             PY
-            exit "$rc"
           fi
+          exit "$rc"
 
       - name: Unit tests
         run: python -m unittest discover -s tests -t . -v
