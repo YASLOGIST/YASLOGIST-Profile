@@ -12,7 +12,8 @@ Produces, next to this file:
 
 The scene is drawn procedurally by `scene.py` (Pillow + NumPy) - no stock
 imagery, no network access, and no JavaScript at display time, so GitHub
-renders the motion directly.
+renders the motion directly. Brand-mark geometry is read from
+`yaslogist-mark.svg` by `mark.py`, so the logo has a single source of truth.
 
 Requirements: Pillow and NumPy only. Fonts are read from `assets/readme/fonts/`,
 so the build needs no network access and stays reproducible.

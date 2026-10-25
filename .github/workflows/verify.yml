@@ -1,0 +1,61 @@
+name: Verify profile assets
+
+# This repository has no application runtime; the artefacts that can actually
+# break are the committed artwork, the asset paths in README.md and the
+# generator constants that describe them. Every push and pull request re-checks
+# those, so the "Verified by automation" table in the README stays true.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Assets, mark geometry and unit tests
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # Pillow is only needed for the pixel rows of the verifier (palette
+      # identity, blank frames, loop seam, flicker) and NumPy only for the
+      # single-frame reproduction check. The mark parser, the GIF block walker
+      # and the rest of the unit tests are standard library only.
+      - name: Install verification dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "Pillow>=10,<12" "numpy>=1.24,<3"
+
+      - name: Byte-compile the generators and tools
+        run: |
+          python -m py_compile \
+            assets/readme/build_hero.py \
+            assets/readme/scene.py \
+            assets/readme/mark.py \
+            tools/verify_assets.py
+
+      - name: Verify committed assets against README.md
+        run: python tools/verify_assets.py --strict --reproduce
+
+      - name: Unit tests
+        run: python -m unittest discover -s tests -t . -v
+
+      - name: Whitespace hygiene
+        run: |
+          if git grep -nI '[[:space:]]$' -- '*.md' '*.py' '*.yml'; then
+            echo "::error::trailing whitespace found in tracked files"
+            exit 1
+          fi

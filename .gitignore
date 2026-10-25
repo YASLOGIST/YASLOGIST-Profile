@@ -1,0 +1,13 @@
+# Python bytecode from the asset tooling and tests
+__pycache__/
+*.py[cod]
+
+# Local build tooling (see README: the venv is never part of the profile)
+.venv/
+venv/
+
+# Editor / OS noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
