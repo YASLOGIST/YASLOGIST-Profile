@@ -1,7 +1,7 @@
 <div align="center">
   <img
-    src="./assets/readme/yaslogist-hero.webp"
-    alt="YASLOGIST system map: the circular YL mark inside a wireframe globe, illustrative gateway routes, and a multimodal schematic connecting Land, Ocean and Air with Data, Visibility and Intelligence. The routes are schematic, not live operations data."
+    src="./assets/readme/yaslogist-hero.gif"
+    alt="Animated YASLOGIST system map: the circular YL mark inside a rotating wireframe globe, with illustrative routes and moving signals connecting Land, Ocean and Air with Data, Visibility and Intelligence. The routes are schematic, not live operations data."
     width="100%"
   />
 </div>
@@ -11,12 +11,14 @@
 **MOVE SMARTER. SEE FURTHER.**<br />
 <sub>YASLOGIST · ENGINEERING &amp; DIGITAL PRODUCTS · CAIRO, EGYPT</sub>
 
-<sub><a href="./assets/readme/yaslogist-hero.gif">View the animated hero</a> (9.7 MiB, looping GIF) · The routes are schematic, not live logistics data.</sub><br />
-<sub>The lightweight static poster loads by default; animation is optional. <a href="./assets/readme/yaslogist-hero.png">Open the full-quality PNG</a>.</sub>
+<sub>The routes are schematic, not live logistics data. The hero is a 9.7 MiB looping GIF.</sub><br />
+<sub>Prefer a still image? Open the <a href="./assets/readme/yaslogist-hero.webp">lightweight static poster</a> or the <a href="./assets/readme/yaslogist-hero.png">full-quality PNG</a>.</sub>
 
 </div>
 
----
+<div align="center">
+  <img src="./assets/readme/yaslogist-signal.gif" alt="" width="100%" />
+</div>
 
 ## 01 / THE SYSTEM
 
@@ -27,19 +29,19 @@ This repository is the **GitHub profile**: a curated entry point to that work, n
 <details>
 <summary><strong>How the hero artwork is built</strong></summary>
 
-The opening poster and optional **pre-rendered motion piece** are generated procedurally by the tooling in this repository rather than assembled from third-party imagery:
+The opening **pre-rendered motion piece** and its static posters are generated procedurally by the tooling in this repository rather than assembled from third-party imagery:
 
 | Property | Value |
 | :--- | :--- |
 | Master composition | 1920 × 720, 200 frames, 50 ms per frame (**10.0 s**), seamless loop |
 | Format | GIF89a, **one 256-colour palette shared by all frames** — GitHub displays it with **no JavaScript, no video player, no external hosting** |
 | Size | 10,205,727 bytes ≈ 9.7 MiB (single file, served from this repository) |
-| Default poster | [`yaslogist-hero.webp`](./assets/readme/yaslogist-hero.webp), 137 KiB; derived from the [1.4 MiB PNG master](./assets/readme/yaslogist-hero.png) |
+| Static alternatives | [`yaslogist-hero.webp`](./assets/readme/yaslogist-hero.webp), 137 KiB; derived from the [1.4 MiB PNG master](./assets/readme/yaslogist-hero.png) |
 | Generator | [`assets/readme/build_hero.py`](./assets/readme/build_hero.py) + [`assets/readme/scene.py`](./assets/readme/scene.py) |
 | Brand mark | Parsed at build time from [`yaslogist-mark.svg`](./assets/readme/yaslogist-mark.svg) by [`assets/readme/mark.py`](./assets/readme/mark.py) — the official YL mark, not a redrawn approximation and not a second copy of the coordinates |
 | Type | Inter and JetBrains Mono, bundled in [`assets/readme/fonts/`](./assets/readme/fonts) |
 
-The optional [animated signal line](./assets/readme/yaslogist-signal.gif) uses the same visual system. Every animated element in the hero is periodic over the loop, and expanding pulses are damped to zero at the seam, so the composition returns to its opening state with no visible cut. The loop seam, palette and timing are re-checked from the committed file by `tools/verify_assets.py` on every push — see *Verified by automation* below.
+The [animated signal line](./assets/readme/yaslogist-signal.gif) uses the same visual system. Every animated element in the hero is periodic over the loop, and expanding pulses are damped to zero at the seam, so the composition returns to its opening state with no visible cut. The loop seam, palette and timing are re-checked from the committed file by `tools/verify_assets.py` on every push — see *Verified by automation* below.
 
 </details>
 
@@ -211,7 +213,7 @@ Encoding size is dominated by *how much of the frame changes per second*, not by
 <details>
 <summary><strong>Checks you can run</strong></summary>
 
-Everything here is Python 3.11+ and needs no network access.
+Everything here is Python 3.11+ and needs no network access. The existing `test_profile_opens_with_static_art_and_opt_in_motion` test expects a static hero and will fail for this animated-first presentation; it needs updating before CI can pass. The test and CI configuration are outside this presentation-only change.
 
 ```bash
 # structural + pixel verification of every committed asset (Pillow for the pixel rows)
