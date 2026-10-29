@@ -1,13 +1,7 @@
 <div align="center">
   <img
-    src="./assets/readme/yaslogist-hero.gif"
-    alt="Animated YASLOGIST cinematic system map: the official circular YL mark mounted in a rotating wireframe globe, with pulses travelling along illustrative gateway routes and a multimodal workstream schematic reading Land, Ocean, Air into Data, Visibility and Intelligence. Labelled in-frame as schematic and not live operations data."
-    width="100%"
-  />
-  <br />
-  <img
-    src="./assets/readme/yaslogist-signal.gif"
-    alt="A restrained animated signal line in the YASLOGIST visual system."
+    src="./assets/readme/yaslogist-hero.webp"
+    alt="YASLOGIST system map: the circular YL mark inside a wireframe globe, illustrative gateway routes, and a multimodal schematic connecting Land, Ocean and Air with Data, Visibility and Intelligence. The routes are schematic, not live operations data."
     width="100%"
   />
 </div>
@@ -17,8 +11,8 @@
 **MOVE SMARTER. SEE FURTHER.**<br />
 <sub>YASLOGIST · ENGINEERING &amp; DIGITAL PRODUCTS · CAIRO, EGYPT</sub>
 
-<sub><a href="./assets/readme/yaslogist-hero.png">Open the static hero poster</a> · The route artwork is a schematic of the public portfolio, not live logistics data.</sub><br />
-<sub>The moving hero is a pre-rendered 9.7 MiB GIF; on a slow connection the poster above is the same composition at 1.4 MiB.</sub>
+<sub><a href="./assets/readme/yaslogist-hero.gif">View the animated hero</a> (9.7 MiB, looping GIF) · The routes are schematic, not live logistics data.</sub><br />
+<sub>The lightweight static poster loads by default; animation is optional. <a href="./assets/readme/yaslogist-hero.png">Open the full-quality PNG</a>.</sub>
 
 </div>
 
@@ -33,19 +27,19 @@ This repository is the **GitHub profile**: a curated entry point to that work, n
 <details>
 <summary><strong>How the hero artwork is built</strong></summary>
 
-The opening visual is a **pre-rendered motion piece**, generated procedurally by the tooling in this repository rather than assembled from third-party imagery:
+The opening poster and optional **pre-rendered motion piece** are generated procedurally by the tooling in this repository rather than assembled from third-party imagery:
 
 | Property | Value |
 | :--- | :--- |
 | Master composition | 1920 × 720, 200 frames, 50 ms per frame (**10.0 s**), seamless loop |
 | Format | GIF89a, **one 256-colour palette shared by all frames** — GitHub displays it with **no JavaScript, no video player, no external hosting** |
 | Size | 10,205,727 bytes ≈ 9.7 MiB (single file, served from this repository) |
-| Static fallback | [`yaslogist-hero.png`](./assets/readme/yaslogist-hero.png) |
+| Default poster | [`yaslogist-hero.webp`](./assets/readme/yaslogist-hero.webp), 137 KiB; derived from the [1.4 MiB PNG master](./assets/readme/yaslogist-hero.png) |
 | Generator | [`assets/readme/build_hero.py`](./assets/readme/build_hero.py) + [`assets/readme/scene.py`](./assets/readme/scene.py) |
 | Brand mark | Parsed at build time from [`yaslogist-mark.svg`](./assets/readme/yaslogist-mark.svg) by [`assets/readme/mark.py`](./assets/readme/mark.py) — the official YL mark, not a redrawn approximation and not a second copy of the coordinates |
 | Type | Inter and JetBrains Mono, bundled in [`assets/readme/fonts/`](./assets/readme/fonts) |
 
-Every animated element is periodic over the loop, and expanding pulses are damped to zero at the seam, so the composition returns to its opening state with no visible cut. The loop seam, palette and timing are re-checked from the committed file by `tools/verify_assets.py` on every push — see *Verified by automation* below.
+The optional [animated signal line](./assets/readme/yaslogist-signal.gif) uses the same visual system. Every animated element in the hero is periodic over the loop, and expanding pulses are damped to zero at the seam, so the composition returns to its opening state with no visible cut. The loop seam, palette and timing are re-checked from the committed file by `tools/verify_assets.py` on every push — see *Verified by automation* below.
 
 </details>
 
@@ -155,6 +149,7 @@ assets/readme/                 committed hero, poster, signal, signature, mark S
   mark.py                      parses the YL mark SVG — the only copy of the glyph geometry
   scene.py                     procedural scene (Pillow + NumPy)
   build_hero.py                renders the committed hero GIF/poster + build stamp
+  build_poster.py              derives the lightweight WebP poster from the PNG
   yaslogist-hero.build.json    provenance stamp: input hashes + artwork hashes
 tools/verify_assets.py         asset + README verifier (this is the check CI runs)
 tests/                        unittest suite for the mark parser, render and verifier
@@ -180,7 +175,7 @@ These rows are produced by `python3 tools/verify_assets.py` against the committe
 | Hero decodes | 200 frames decoded, no corrupt or blank frame (per-frame luminance std 33.5–34.1) |
 | Loop continuity | The `frame[199] → frame[0]` step changes 1.88 % of pixels versus 2.53 % for a typical mid-loop step, so the loop reads as continuous |
 | Motion smoothness | Global brightness never jumps more than 0.79/255 between frames; per-pixel change median 0.43/255, 95th percentile 2.64/255 |
-| Poster fallback | 1920 × 720, 8-bit RGB, committed alongside the animation |
+| Posters | 1920 × 720 PNG master and lightweight WebP; the verifier checks the WebP source hash, dimensions and mean pixel difference |
 | Brand mark | Glyph geometry parsed from `yaslogist-mark.svg` at build time; two outlines, ink = 16.1 % of the ring box |
 | Asset paths | Every asset reference in this README resolves to a committed file or directory |
 | Linked projects | All ten linked repositories were checked against the live account listing (`api.github.com/users/YASLOGIST/repos`), and languages shown here match; demo links are each repository's own declared homepage |
@@ -192,13 +187,16 @@ Motion, palette and file size were balanced against each other: the art directio
 <details>
 <summary><strong>Regenerating the artwork</strong></summary>
 
-The motion is baked into local GIFs for reliable GitHub display. To rebuild it, use Python 3 with Pillow and NumPy:
+The motion is baked into local GIFs for reliable GitHub display when opened. To rebuild it, use Python 3 with Pillow and NumPy:
 
 ```bash
 python3 -m venv ~/.venvs/yaslogist-readme
 ~/.venvs/yaslogist-readme/bin/python -m pip install Pillow numpy
 ~/.venvs/yaslogist-readme/bin/python assets/readme/build_hero.py
+~/.venvs/yaslogist-readme/bin/python assets/readme/build_poster.py
 ```
+
+Rebuild the WebP after the PNG master: its embedded source hash lets the verifier detect a stale poster. The WebP is lossy; the full-quality PNG remains available.
 
 A rebuild produces a visually equivalent but not byte-identical render on a different machine; that is expected, and the build stamp records which renderer produced the committed file.
 
@@ -227,7 +225,7 @@ python3 tools/verify_assets.py --probe      # also re-render frame 100 and repor
 python3 -m unittest discover -s tests -t .
 
 # syntax + whitespace
-python3 -m py_compile assets/readme/build_hero.py assets/readme/scene.py \
+python3 -m py_compile assets/readme/build_hero.py assets/readme/build_poster.py assets/readme/scene.py \
     assets/readme/mark.py tools/verify_assets.py
 git diff --check
 ```
@@ -236,7 +234,7 @@ git diff --check
 
 `--probe [FRAME]` re-renders one frame and reports the difference against the committed GIF for a human to read — useful immediately after a rebuild. It is informational and never a pass/fail gate.
 
-If you change anything the artwork is drawn from, rebuild it — `assets/readme/build_hero.py` writes the GIF, the poster and the stamp in one run. `--stamp-only` refreshes the stamp without re-rendering the loop, which is only correct when the pixels cannot have changed (a comment edit).
+If you change anything the artwork is drawn from, rebuild it — `assets/readme/build_hero.py` writes the GIF, the PNG poster and the stamp in one run; then run `assets/readme/build_poster.py` to update the WebP. `--stamp-only` refreshes the stamp without re-rendering the loop, which is only correct when the pixels cannot have changed (a comment edit).
 
 `tools/verify_assets.py` fails the build on a missing asset path, a truncated or mistimed GIF, frames that disagree on palette, a blank frame, a broken loop seam, a brightness jump between frames, or a `scene.py` constant that no longer matches the committed artwork. Media that is committed but no longer referenced by the README is reported as a warning, not a failure, so legacy artwork can stay without blocking a change; the two retired hero files are declared explicitly in the verifier, which keeps the warning actionable for anything new.
 
@@ -252,13 +250,7 @@ No product dependencies are added by this tooling: the verifier is standard libr
 - **Not asserted by this README:** live operational feeds, production service levels, commercial deployment, or integrations between projects.
 - **Demo links** are the homepages each linked repository declares for itself. A demo being listed here does not mean this profile vouches for its uptime, and nothing in this repository monitors it.
 
-<div align="center">
-  <img
-    src="./assets/readme/yaslogist-signal.gif"
-    alt="A restrained animated signal line in the YASLOGIST visual system."
-    width="100%"
-  />
-</div>
+---
 
 ## 09 / YASLOGIST
 

@@ -35,6 +35,7 @@ README = ROOT / "README.md"
 README_DIR = ROOT / "assets" / "readme"
 HERO = README_DIR / "yaslogist-hero.gif"
 POSTER = README_DIR / "yaslogist-hero.png"
+LIGHT_POSTER = README_DIR / "yaslogist-hero.webp"
 SIGNAL = README_DIR / "yaslogist-signal.gif"
 SIGNATURE = README_DIR / "yaslogist-signature.png"
 MARK_SVG = README_DIR / "yaslogist-mark.svg"
@@ -412,6 +413,33 @@ def check_still(path: Path, name: str, report: Report, expected: tuple[int, int]
         )
 
 
+def check_light_poster(report: Report, source: Path = POSTER,
+                       derivative: Path = LIGHT_POSTER) -> None:
+    """Check the lightweight WebP derivative against its PNG master."""
+    try:
+        from PIL import Image, ImageChops, ImageStat
+    except ImportError:
+        report.skip("poster.webp", "Pillow is required to verify the lightweight poster")
+        return
+    try:
+        digest = _sha256(source)
+        with Image.open(source) as master, Image.open(derivative) as image:
+            xmp = image.info.get("xmp", b"")
+            expected = f'yas:source-sha256="{digest}"'.encode("ascii")
+            valid = (image.format == "WEBP" and not getattr(image, "is_animated", False)
+                     and image.size == master.size and expected in xmp)
+            if not valid:
+                report.fail("poster.webp", "wrong format, size, animation state or source hash")
+                return
+            difference = ImageChops.difference(master.convert("RGB"), image.convert("RGB"))
+            mean = sum(ImageStat.Stat(difference).mean) / 3
+            report.check("poster.webp", mean <= 2.5,
+                         f"{image.width}x{image.height}, mean channel error {mean:.2f}/255 "
+                         f"(limit 2.5), source hash matches")
+    except (OSError, ValueError) as exc:
+        report.fail("poster.webp", f"cannot verify lightweight poster: {exc}")
+
+
 def check_mark(report: Report) -> None:
     sys.path.insert(0, str(README_DIR))
     try:
@@ -733,6 +761,7 @@ def main(argv: list[str] | None = None) -> int:
     check_readme_refs(report)
     facts = check_gif_structure(report)
     check_stills(report)
+    check_light_poster(report)
     check_mark(report)
     check_stamp(report, facts)
     check_scene_determinism(report)
