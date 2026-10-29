@@ -125,7 +125,7 @@ flowchart TB
     width="100%"
   />
   <br />
-  <sub>Static plate of the same map, for readers who prefer an image to a rendered diagram.</sub>
+  <sub>Illustrative workstream plate; the Mermaid diagram above maps the broader portfolio navigation.</sub>
 </p>
 
 ## 06 / HOW TO EXPLORE
@@ -219,7 +219,7 @@ Everything here is Python 3.11+ and needs no network access.
 # structural + pixel verification of every committed asset (Pillow for the pixel rows)
 python3 -m pip install Pillow          # optional; without it those rows report SKIP
 python3 tools/verify_assets.py
-python3 tools/verify_assets.py --strict   # fail instead of SKIP when Pillow is missing
+python3 tools/verify_assets.py --strict   # fail if required checks are skipped (Pillow + NumPy)
 python3 tools/verify_assets.py --probe      # also re-render frame 100 and report the
                                              # difference (informational; Pillow + NumPy)
 

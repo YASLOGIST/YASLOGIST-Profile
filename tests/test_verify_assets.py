@@ -13,6 +13,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "tools"))
@@ -59,6 +60,33 @@ class VerifyAssetsTest(unittest.TestCase):
             with self.assertRaises(ValueError):
                 verify_assets.parse_gif(broken)
 
+    def test_parser_handles_local_palette_and_truncation(self) -> None:
+        # A valid one-pixel GIF can use a local palette and no global table.
+        data = (b"GIF89a" + b"\x01\x00\x01\x00\x00\x00\x00"
+                + b"\x2c\x00\x00\x00\x00\x01\x00\x01\x00\x80"
+                + b"\x00\x00\x00\xff\xff\xff"
+                + b"\x02\x02\x44\x01\x00\x3b")
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "local.gif"
+            path.write_bytes(data)
+            facts = verify_assets.parse_gif(path)
+            self.assertEqual(facts.frames, 1)
+            self.assertFalse(facts.global_table)
+            for length in range(len(data)):
+                path.write_bytes(data[:length])
+                with self.subTest(length=length), self.assertRaises(ValueError):
+                    verify_assets.parse_gif(path)
+
+    def test_truncated_extensions_raise_value_error(self) -> None:
+        header = b"GIF89a" + b"\x01\x00\x01\x00\x00\x00\x00"
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "broken.gif"
+            for suffix in (b"\x21", b"\x21\xf9", b"\x21\xf9\x04\x00",
+                           b"\x21\xff", b"\x21\xff\x0bNET"):
+                path.write_bytes(header + suffix)
+                with self.subTest(suffix=suffix), self.assertRaises(ValueError):
+                    verify_assets.parse_gif(path)
+
     def test_orphan_detection_is_actionable(self) -> None:
         # Everything the README references, plus the documented legacy art,
         # must leave no orphans.
@@ -100,18 +128,33 @@ class VerifyAssetsTest(unittest.TestCase):
         """A source edit without a rebuild must be reported as stale."""
         victim = "assets/readme/scene.py"
 
-        original = verify_assets.ROOT / victim
         with tempfile.TemporaryDirectory() as tmp:
-            backup = Path(tmp) / "scene.py"
-            shutil.copy2(original, backup)
-            try:
-                original.write_text(original.read_text(encoding="utf-8") + "\n")
+            root = Path(tmp)
+            for name in json.loads(verify_assets.STAMP.read_text())["inputs"]:
+                target = root / name
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(verify_assets.ROOT / name, target)
+            changed = root / victim
+            changed.write_text(changed.read_text(encoding="utf-8") + "\n")
+            with mock.patch.object(verify_assets, "ROOT", root):
                 report = verify_assets.Report()
                 verify_assets.check_stamp(report, None)
-                self.assertIn("artwork.stamp", [n for n, _, _ in report.failures])
-                self.assertIn(victim, report.failures[0][2])
-            finally:
-                shutil.copy2(backup, original)
+            self.assertIn("artwork.stamp", [n for n, _, _ in report.failures])
+            self.assertIn(victim, report.failures[0][2])
+
+    def test_stamp_rejects_removed_entries(self) -> None:
+        stamp = json.loads(verify_assets.STAMP.read_text(encoding="utf-8"))
+        del stamp["inputs"]["assets/readme/scene.py"]
+        del stamp["artwork"]["yaslogist-hero.gif"]
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "stamp.json"
+            path.write_text(json.dumps(stamp), encoding="utf-8")
+            with mock.patch.object(verify_assets, "STAMP", path):
+                report = verify_assets.Report()
+                verify_assets.check_stamp(report, None)
+        failures = {name for name, _, _ in report.failures}
+        self.assertTrue({"artwork.stamp_inputs", "artwork.fingerprint",
+                         "artwork.stamp_files"} <= failures)
 
     def test_stamp_records_provenance_and_timing(self) -> None:
         stamp = json.loads(verify_assets.STAMP.read_text(encoding="utf-8"))

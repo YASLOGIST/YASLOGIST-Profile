@@ -229,8 +229,8 @@ def parse_gif(path: Path) -> GifFacts:
         size = 3 * (2 ** ((packed & 0x07) + 1))
         facts.global_table = data[pos:pos + size]
         pos += size
-    if len(facts.global_table) != 3 * (2 ** ((packed & 0x07) + 1)):
-        raise ValueError("global colour table is truncated")
+        if len(facts.global_table) != size:
+            raise ValueError("global colour table is truncated")
 
     def read_subblocks(at: int) -> tuple[bytes, int]:
         out = bytearray()
@@ -241,6 +241,8 @@ def parse_gif(path: Path) -> GifFacts:
             at += 1
             if size == 0:
                 return bytes(out), at
+            if at + size > len(data):
+                raise ValueError("sub-block data is truncated")
             out += data[at:at + size]
             at += size
 
@@ -253,20 +255,28 @@ def parse_gif(path: Path) -> GifFacts:
             facts.trailing_bytes = len(data) - pos
             break
         if block == 0x21:                                 # extension
+            if pos >= len(data):
+                raise ValueError("extension label is truncated")
             label = data[pos]
             pos += 1
             if label == 0xF9:                             # graphic control
+                if pos >= len(data):
+                    raise ValueError("graphic control extension is truncated")
                 size = data[pos]
                 body = data[pos + 1:pos + 1 + size]
                 pos += 1 + size
-                if len(body) < 3 or data[pos] != 0:
+                if size != 4 or len(body) != 4 or pos >= len(data) or data[pos] != 0:
                     raise ValueError("malformed graphic control extension")
                 pos += 1
                 pending_delay = struct.unpack("<H", body[1:3])[0] * 10
             elif label == 0xFF:                           # application
+                if pos >= len(data):
+                    raise ValueError("application extension is truncated")
                 size = data[pos]
                 ident = data[pos + 1:pos + 1 + size]
                 pos += 1 + size
+                if len(ident) != size:
+                    raise ValueError("application identifier is truncated")
                 payload, pos = read_subblocks(pos)
                 facts.has_app_ext = True
                 if ident.startswith(b"NETSCAPE") and len(payload) >= 3:
@@ -283,8 +293,13 @@ def parse_gif(path: Path) -> GifFacts:
             pos += 9
             if packed_img & 0x80:
                 size = 3 * (2 ** ((packed_img & 0x07) + 1))
-                facts.local_tables.append(data[pos:pos + size])
+                table = data[pos:pos + size]
+                if len(table) != size:
+                    raise ValueError("local colour table is truncated")
+                facts.local_tables.append(table)
                 pos += size
+            if pos >= len(data):
+                raise ValueError("LZW code size is missing")
             pos += 1                                      # LZW minimum code size
             _, pos = read_subblocks(pos)
             facts.frames += 1
@@ -536,6 +551,23 @@ def check_stamp(report: Report, facts: GifFacts | None) -> None:
         report.fail("artwork.stamp", "stamp records no input hashes")
         return
 
+    required_inputs = {
+        "assets/readme/build_hero.py", "assets/readme/mark.py",
+        "assets/readme/scene.py", "assets/readme/yaslogist-mark.svg",
+        *(f"assets/readme/fonts/{name}.ttf" for name in (
+            "Inter-ExtraBold", "Inter-Regular", "Inter-SemiBold",
+            "JetBrainsMono-Regular", "JetBrainsMono-SemiBold")),
+    }
+    missing_entries = sorted(required_inputs - inputs.keys())
+    if missing_entries:
+        report.fail("artwork.stamp_inputs", "missing input entries: " + ", ".join(missing_entries))
+    fingerprint = hashlib.sha256(
+        "\n".join(f"{name}:{digest}" for name, digest in sorted(inputs.items())).encode()
+    ).hexdigest()
+    report.check("artwork.fingerprint", stamp.get("fingerprint") == fingerprint,
+                 "input fingerprint matches" if stamp.get("fingerprint") == fingerprint
+                 else "input fingerprint does not match stamp entries")
+
     stale = []
     missing = []
     for name, digest in sorted(inputs.items()):
@@ -555,8 +587,15 @@ def check_stamp(report: Report, facts: GifFacts | None) -> None:
 
     # The stamp describes the artwork that exists now, not one that has been
     # replaced or hand-edited since.
-    problems = []
-    for name, recorded in sorted((stamp.get("artwork") or {}).items()):
+    artwork = stamp.get("artwork")
+    if not isinstance(artwork, dict):
+        artwork = {}
+    problems = [f"{name} missing from stamp" for name in (HERO.name, POSTER.name)
+                if name not in artwork]
+    for name, recorded in sorted(artwork.items()):
+        if not isinstance(recorded, dict):
+            problems.append(f"{name} has invalid metadata")
+            continue
         path = README_DIR / name
         if not path.is_file():
             problems.append(f"{name} missing")
@@ -608,7 +647,7 @@ def check_scene_determinism(report: Report, index: int = 0) -> None:
     try:
         import scene
     except Exception as exc:  # pragma: no cover
-        report.skip("scene.deterministic", f"cannot import scene.py: {exc}")
+        report.fail("scene.deterministic", f"cannot import scene.py: {exc}")
         return
 
     frames = scene_constants().get("FRAMES,DELAY", (0, 0))[0]
@@ -700,6 +739,10 @@ def main(argv: list[str] | None = None) -> int:
     check_pixels(report, args.strict)
     if args.probe is not None:
         probe_render(report, args.probe)
+
+    if args.strict:
+        for name, _, detail in list(report.skips):
+            report.fail(name + ".required", detail)
 
     print("YASLOGIST profile asset verification")
     print(report.render(quiet=args.quiet))
