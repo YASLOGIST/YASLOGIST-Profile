@@ -48,6 +48,7 @@ jobs:
         run: |
           python -m py_compile \
             assets/readme/build_hero.py \
+            assets/readme/build_poster.py \
             assets/readme/scene.py \
             assets/readme/mark.py \
             tools/verify_assets.py

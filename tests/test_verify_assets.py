@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import re
 import shutil
 import sys
 import tempfile
@@ -38,6 +39,30 @@ class VerifyAssetsTest(unittest.TestCase):
         # Legacy art may stay in the repository; it must never break the build,
         # but it should be visible in the verifier output.
         self.assertFalse(report.failures)
+
+    def test_profile_opens_with_static_art_and_opt_in_motion(self) -> None:
+        text = verify_assets.README.read_text(encoding="utf-8")
+        image_sources = re.findall(r'<img\b[^>]*\bsrc="([^"]+)"', text, re.DOTALL)
+        self.assertTrue(image_sources)
+        self.assertEqual(image_sources[0], "./assets/readme/yaslogist-hero.webp")
+        self.assertFalse(any(src.lower().endswith(".gif") for src in image_sources),
+                         "profile images should not autoplay animation")
+        self.assertIn('href="./assets/readme/yaslogist-hero.gif"', text)
+
+    def test_light_poster_matches_master_and_detects_staleness(self) -> None:
+        if importlib.util.find_spec("PIL") is None:
+            self.skipTest("Pillow is not installed")
+        report = verify_assets.Report()
+        verify_assets.check_light_poster(report)
+        self.assertFalse(report.failures)
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / "changed.png"
+            shutil.copy2(verify_assets.POSTER, source)
+            with source.open("ab") as handle:
+                handle.write(b"changed")
+            stale = verify_assets.Report()
+            verify_assets.check_light_poster(stale, source=source)
+            self.assertIn("poster.webp", [name for name, _, _ in stale.failures])
 
     def test_hero_structural_facts(self) -> None:
         facts = verify_assets.parse_gif(verify_assets.HERO)
