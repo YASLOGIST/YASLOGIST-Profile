@@ -1,0 +1,32 @@
+{
+  "artwork": {
+    "profile-index.gif": {
+      "bytes": 1110850,
+      "sha256": "d3884d63a7ee3d86b85afe326c4001c9b74913ef371c0855b3556d887af032f8"
+    },
+    "profile-index.png": {
+      "bytes": 217391,
+      "sha256": "9c56d19b358faab8c2f1ba5b741d8a93d55ba6bc730930a3d365ef57d257ec70"
+    }
+  },
+  "canvas": [
+    1920,
+    720
+  ],
+  "duration_ms": 9000,
+  "generator": "assets/readme/build_profile_index.py",
+  "inputs": {
+    "assets/readme/build_profile_index.py": "8fd0b4ed3ea0b966d04756b0b6b4d11323b9309a7837e1e8443f29f213ea02ac",
+    "assets/readme/fonts/Inter-ExtraBold.ttf": "ffae25f02a62487de2ab8bde4fab37929d5654194c37c7c52111dbd667434e40",
+    "assets/readme/fonts/Inter-Regular.ttf": "e084f795faa8286a09d6327e6c47e4ec9590bb47d96158d913eaeb589924d197",
+    "assets/readme/fonts/Inter-SemiBold.ttf": "76002829260c5636f33072baf8b9a3bff60f1f0793c38b329f7af8bdcc5a3ffa",
+    "assets/readme/fonts/JetBrainsMono-Regular.ttf": "79082c5942a902af4e91ff30e64e21af02384b737be9ff8adc2bae283534ec73",
+    "assets/readme/fonts/JetBrainsMono-SemiBold.ttf": "1e30dc1fa9e7ce2308c0245a3083b35285285b826138bc48fddd42306cc618cc",
+    "assets/readme/mark.py": "c20adc0b8261907f9fe074c6042d1c5f69137c9c6d51cb97d91d57c00e8a1342",
+    "assets/readme/yaslogist-mark.svg": "3c12c9c8c7dddd376506f7b868bd68eb546af91ccc9aa83db10f2caeac24bfc2"
+  },
+  "note": "Hashes detect stale files; rasterization can vary across Pillow/FreeType versions.",
+  "renderer": {
+    "pillow": "13.0.0"
+  }
+}
