@@ -1,7 +1,7 @@
 <div align="center">
   <img
     src="./assets/readme/profile-index.gif"
-    alt="Animated YASLOGIST profile index: a selector follows a branching spine to multimodal workstreams, independent products, and computational labs. This is an illustration of portfolio navigation, not live activity."
+    alt="Animated architectural schematic of YASLOGIST-Profile: from a single origin hub, an index coupler steps sequentially across three isolated rails — 01 Multimodal (4 linked repositories plus 1 gated dashed Land vision slot), 02 Products (4 independent repositories), and 03 Labs (2 computational repositories: 3D ULD container and orbital Earth) — before returning smoothly to equilibrium. Pre-rendered schematic illustration, not live operational data."
     width="100%"
   />
 </div>
@@ -10,160 +10,203 @@
 
 # YASLOGIST-Profile
 
-**One index for logistics workstreams, independent products, and computational labs.**
+**Self-verified public portfolio index mapping ten independent repositories across multimodal logistics, digital products, and computational labs.**
 
-A public portfolio by [YASLOGIST](https://www.yaslogist.com) · Engineering &amp; digital products · Cairo, Egypt
+A public engineering portfolio by **[YASLOGIST](https://www.yaslogist.com)** · Cairo, Egypt
 
-[Explore the work](#user-content-workstreams) · [How this repository works](#user-content-profile-repository) · [Official website](https://www.yaslogist.com)
+[Portfolio Index](#02--portfolio-index) · [Topology &amp; Provenance](#03--topology--provenance-flow) · [Tooling &amp; Validation](#04--repository-tooling--validation) · [Status &amp; Boundaries](#05--status--boundaries) · [yaslogist.com](https://www.yaslogist.com)
 
-<sub>The opening animation is a navigation schematic, not operational data. Prefer no motion? <a href="./assets/readme/profile-index.png">Open the static poster</a>.</sub>
+<sub>Pre-rendered schematic index — not live telemetry or a shared control room. Prefer reduced motion? <a href="./assets/readme/profile-index.png">Open the static poster (PNG)</a>.</sub>
 
 </div>
 
-## 01 / The profile
+---
 
-YASLOGIST explores multimodal logistics, data, visibility, and intelligence alongside independent digital products and creative engineering. **This repository is the portfolio entry point**, not a logistics application or a shared control room. The projects below keep their own identities, source code, and maturity; a line between them in the artwork represents a place in the index, not a software integration.
+## 01 / Orientation &amp; Quick Check
 
-Public project descriptions and demos are not evidence of live feeds, commercial deployment, production integrations, or service levels. Follow a repository for its implementation, setup instructions, tests, and current limitations.
+**`YASLOGIST-Profile`** is the organization-level entry point for public work published under [`github.com/YASLOGIST`](https://github.com/YASLOGIST). It indexes **ten standalone public repositories** across three domains without coupling them into a shared runtime, backend, API, or data bus. Inside this repository itself, Python build and verification scripts compile the profile's artwork from a single SVG brand-mark master, record SHA-256 input/output provenance stamps, and validate binary media structure and README asset integrity.
 
-<a id="workstreams"></a>
-
-## 02 / Multimodal workstreams
-
-| Project · primary language | Public scope | Listed demo |
-| :--- | :--- | :--- |
-| **[YASLOGIST Air](https://github.com/YASLOGIST/air)** · TypeScript | Air-freight simulation cockpit for cargo planning, ULD fit, and CAI corridors. | [Air](https://air.yaslogist.me) |
-| **[YASLOGIST Ocean](https://github.com/YASLOGIST/OCEAN-YASLOGIST)** · TypeScript | Sea-freight demo covering Egyptian gateway scenarios, cold-chain cases, and shipment handoffs. | [Ocean](https://ocean.yaslogist.me) |
-| **[LOGISDATA](https://github.com/YASLOGIST/LOGISDATA)** · TypeScript | Interactive supply-chain audit and data-reconciliation control room. | [LOGISDATA](https://logisdata.vercel.app) |
-| **[YASLOGIST Intelligence](https://github.com/YASLOGIST/yaslogist-intelligence)** · JavaScript | Regional threat and supply-chain intelligence dashboard. | [Intelligence](https://yaslogist-intelligence.vercel.app) |
-
-**Land** is part of the broader multimodal direction; this profile does not link a standalone Land repository.
-
-## 03 / Independent products
-
-| Project · primary language | Public scope | Listed demo |
-| :--- | :--- | :--- |
-| **[UrLife](https://github.com/YASLOGIST/urlf-up)** · JavaScript | Collaboration platform concept connecting visionaries, builders, and enablers. | [UrLife](https://urlf-up.vercel.app) |
-| **[SOUNDVIS](https://github.com/YASLOGIST/yaslogist-soundvis)** · TypeScript | Audio-reactive 3D visualizer and live VJ performance engine. | — |
-| **[VIP Motors Atelier](https://github.com/YASLOGIST/vip-landing)** · JavaScript | Bilingual luxury-vehicle concierge landing experience. | — |
-| **[YAS Store](https://github.com/YASLOGIST/as-store-v1yas-frontend)** · JavaScript | Shopify Hydrogen storefront with edge rendering, search, and commerce flows. | — |
-
-## 04 / Computational labs
-
-| Project · primary language | Public scope | Listed demo |
-| :--- | :--- | :--- |
-| **[3D-Containers](https://github.com/YASLOGIST/3D-Containers)** · TypeScript | Browser-based ULD workbench with profile-based geometry, procedural materials, and client-side GLB, OBJ, and STL export. | [3D-Containers](https://containers-one.vercel.app) |
-| **[Orbital Earth](https://github.com/YASLOGIST/yastera)** · JavaScript | Three.js and GLSL planet-rendering experiment with a four-layer Earth, single-scattering atmosphere, ocean optics, and city detail, without baked scene lighting. | — |
-
-The descriptions above summarize the linked repositories; they are not independent verification of their operational behavior. Demo links are listed project homepages, not monitored services, and availability is not guaranteed.
-
-## 05 / How the index is organized
-
-This is a **navigation diagram**, not a shared runtime architecture. The portfolio links to independent repositories; it does not move data between them.
-
-```mermaid
-flowchart TD
-    visitor["Visitor"] --> profile["YASLOGIST-Profile<br/>README + local media"]
-    profile --> logistics["Multimodal workstreams<br/>Air · Ocean · LOGISDATA · Intelligence"]
-    profile --> products["Independent products<br/>UrLife · SOUNDVIS · VIP Motors · YAS Store"]
-    profile --> labs["Computational labs<br/>3D-Containers · Orbital Earth"]
-    profile --> site["YASLOGIST website + contact"]
-    logistics -. "broader direction" .-> land["Land · no standalone repo linked here"]
-```
-
-To explore, choose a project above, then open its repository for source and project-specific instructions. Demos, where listed, are separate from this profile.
-
-<a id="profile-repository"></a>
-
-## 06 / Inside this repository
-
-| Layer | What is here |
-| :--- | :--- |
-| **Content** | This README uses GitHub-flavored Markdown, supported HTML, and a Mermaid navigation diagram. |
-| **Media** | A locally stored GIF, a static PNG, the existing YL mark and fonts, and earlier profile artwork. No JavaScript or video player is needed for the hero. |
-| **Runtime** | No application package manifest, backend, API, database, environment variables, or dedicated deployment workflow is defined in this repository. GitHub renders the README; the linked repositories are separate. |
-| **Build-time tools** | Python scripts generate artwork; `tools/verify_assets.py` and `tests/` check the repository. They are not part of the README's runtime. |
-| **Automation** | `.github/workflows/verify.yml` runs the existing verifier and unit tests on pushes to `main`, pull requests, and manual dispatch. See the known test conflict below. |
-
-```text
-README.md                             portfolio content and navigation
-assets/yaslogist-*.{gif,png}          retired artwork, kept but not displayed
-assets/readme/profile-index.gif       animated opening
-assets/readme/profile-index.png       static fallback
-assets/readme/build_profile_index.py  new artwork generator and checks
-assets/readme/profile-index.build.json  source and output hashes
-assets/readme/yaslogist-mark.svg      existing YL mark master
-assets/readme/fonts/                  existing Inter and JetBrains Mono fonts
-assets/readme/scene.py                earlier globe artwork scene
-assets/readme/build_hero.py           earlier GIF/PNG generator and build stamp
-assets/readme/build_poster.py         earlier lightweight WebP generator
-tools/verify_assets.py                existing README and earlier-art verifier
-tests/                                mark, scene and verifier unit tests
-```
-
-<a id="artwork-and-checks"></a>
-
-## 07 / Artwork &amp; local checks
-
-The opening visual treats the profile as a **three-part index**. A selector travels the spine and highlights each category; the projects remain independent. It is pre-rendered, local artwork, not a live status display. The current GIF is **1920 × 720**, loops over **9 seconds**, and is about **1.06 MiB**; its [static poster](./assets/readme/profile-index.png) shows all three branches at once. The GIF may autoplay where supported; the poster is an explicit still alternative, not an automatic reduced-motion switch.
-
-The [generator](./assets/readme/build_profile_index.py) uses Pillow, the bundled [fonts](./assets/readme/fonts/), and the repository's existing [YL SVG mark](./assets/readme/yaslogist-mark.svg), whose geometry is parsed by [`mark.py`](./assets/readme/mark.py). The [build stamp](./assets/readme/profile-index.build.json) records input and output hashes. `--check` decodes every GIF frame, checks duration, loop boundary, brightness changes, poster dimensions, and those hashes. The generator does not require network access after its dependencies are installed; rendering can vary across Pillow/FreeType versions.
-
-### Get a local copy
-
-There is no application to start or configure. To edit the profile or inspect its tools:
+**Proof of life (standard library only, Python 3.11+, no package install required):**
 
 ```bash
 git clone https://github.com/YASLOGIST/YASLOGIST-Profile.git
 cd YASLOGIST-Profile
+python3 tools/verify_assets.py
 ```
 
-### Build and validate the media
+---
 
-Python 3.11+ is used by the repository's CI. The new artwork generator needs Pillow; NumPy is also needed for the existing strict verifier and scene tests. One local setup is:
+## 02 / Portfolio Index
+
+Status labels below follow strict evidence boundaries:
+- **`Present — unverified here`** — public repository and metadata verified on GitHub; implementation, setup, and runtime maturity live in that repository and are not executed or monitored by this profile.
+- **`Planned / vision`** — directional workstream noted for context; no standalone public repository is linked here.
+
+### 02.1 · Multimodal Workstreams (4 linked repositories + 1 directional slot)
+
+| Repository | Stack | Public scope (from linked repository) | Listed homepage | Status from this repo |
+| :--- | :--- | :--- | :--- | :--- |
+| **[YASLOGIST Air](https://github.com/YASLOGIST/air)** | TypeScript | Air-freight simulation cockpit for cargo planning, ULD fit, and CAI corridors. | [air.yaslogist.me](https://air.yaslogist.me) | `Present — unverified here` |
+| **[YASLOGIST Ocean](https://github.com/YASLOGIST/OCEAN-YASLOGIST)** | TypeScript | Sea-freight demo covering Egyptian gateways, cold-chain scenarios, and shipment handoffs. | [ocean.yaslogist.me](https://ocean.yaslogist.me) | `Present — unverified here` |
+| **[LOGISDATA](https://github.com/YASLOGIST/LOGISDATA)** | TypeScript | Interactive supply-chain audit and data-reconciliation control room. | [logisdata.vercel.app](https://logisdata.vercel.app) | `Present — unverified here` |
+| **[YASLOGIST Intelligence](https://github.com/YASLOGIST/yaslogist-intelligence)** | JavaScript | Regional threat and supply-chain intelligence dashboard. | [yaslogist-intelligence.vercel.app](https://yaslogist-intelligence.vercel.app) | `Present — unverified here` |
+| **Land** *(corridor vision)* | — | Ground-operations direction within the multimodal thesis; shown in the hero as the gated dashed fifth cell on Rail `01`. | — | `Planned / vision` |
+
+### 02.2 · Independent Products (4 linked repositories)
+
+| Repository | Stack | Public scope (from linked repository) | Listed homepage | Status from this repo |
+| :--- | :--- | :--- | :--- | :--- |
+| **[UrLife](https://github.com/YASLOGIST/urlf-up)** | JavaScript | Collaboration platform concept connecting visionaries, builders, and enablers. | [urlf-up.vercel.app](https://urlf-up.vercel.app) | `Present — unverified here` |
+| **[SOUNDVIS](https://github.com/YASLOGIST/yaslogist-soundvis)** | TypeScript | Audio-reactive 3D visualizer and live VJ performance engine. | — | `Present — unverified here` |
+| **[VIP Motors Atelier](https://github.com/YASLOGIST/vip-landing)** | JavaScript | Bilingual luxury-vehicle concierge landing experience. | — | `Present — unverified here` |
+| **[YAS Store](https://github.com/YASLOGIST/as-store-v1yas-frontend)** | JavaScript | Shopify Hydrogen storefront with edge rendering, search, and commerce flows. | — | `Present — unverified here` |
+
+### 02.3 · Computational Labs (2 linked repositories)
+
+| Repository | Stack | Public scope (from linked repository) | Listed homepage | Status from this repo |
+| :--- | :--- | :--- | :--- | :--- |
+| **[3D-Containers](https://github.com/YASLOGIST/3D-Containers)** | TypeScript | Browser-based procedural aviation ULD workbench (Three.js + React) with 17 modeled ULD types, envelope inspection, and client-side GLB, OBJ, and STL mesh export. | [containers-one.vercel.app](https://containers-one.vercel.app) | `Present — unverified here` |
+| **[Orbital Earth](https://github.com/YASLOGIST/yastera)** | JavaScript | Real-time Three.js and GLSL ES 3.00 orbital Earth simulation with a four-layer planet, analytic single-scattering atmosphere, ocean optics, and city lighting without baked scene lights. | — | `Present — unverified here` |
+
+> **Navigation &amp; demo boundary:** Listed homepages are declared on the respective repositories for convenience. This profile does not monitor external URLs, verify uptime, or assert commercial deployment, live operational feeds, or service-level guarantees.
+
+---
+
+## 03 / Topology &amp; Provenance Flow
+
+### Portfolio Navigation (No Cross-Repository Runtime)
+
+Edges below represent **documentation links from this README**, never runtime API calls or shared infrastructure:
+
+```mermaid
+flowchart TD
+    V["GitHub Visitor"] --> P["YASLOGIST-Profile<br/>Static Markdown + Local Media"]
+    P --> M["01 · Multimodal Workstreams<br/>air · OCEAN-YASLOGIST · LOGISDATA · yaslogist-intelligence"]
+    P --> D["02 · Independent Products<br/>urlf-up · yaslogist-soundvis · vip-landing · as-store-v1yas-frontend"]
+    P --> L["03 · Computational Labs<br/>3D-Containers · yastera"]
+    P --> W["Official Site &amp; Contact<br/>yaslogist.com"]
+    M -. "gated vision (no repo linked)" .-> LAND["Land Direction"]
+```
+
+### Build-Time Asset &amp; Verification Pipeline (Inside This Repository)
+
+This repository has **no application runtime**. All Python code runs offline at author/CI time to synthesize deterministic media and verify committed files:
+
+```mermaid
+flowchart LR
+    SVG["yaslogist-mark.svg<br/>512x512 vector master"] --> MARK["mark.py<br/>strict M/L/Z polygon parser"]
+    FONTS["assets/readme/fonts/*.ttf<br/>Inter + JetBrains Mono"] --> GEN["build_profile_index.py<br/>2x Lanczos procedural renderer"]
+    MARK --> GEN
+    GEN --> MEDIA["profile-index.gif + .png<br/>1920x720 hero &amp; poster"]
+    GEN --> STAMP["profile-index.build.json<br/>SHA-256 input/output provenance"]
+    MEDIA --> CHECK["build_profile_index.py --check<br/>+ tools/verify_assets.py"]
+    STAMP --> CHECK
+```
+
+---
+
+## 04 / Repository Tooling &amp; Validation
+
+### Architecture &amp; File Inventory
+
+| Layer | Implemented reality in `YASLOGIST-Profile` |
+| :--- | :--- |
+| **Display runtime** | GitHub Markdown/HTML/Mermaid renderer only. Zero JavaScript, external stylesheets, iframes, backends, databases, or package manifests (`package.json`, `pyproject.toml`, `requirements.txt` are intentionally absent). |
+| **Configuration &amp; secrets** | None. No `.env` files, API keys, tokens, or runtime environment variables are consumed by the generators or verifiers. |
+| **Vector brand master** | [`assets/readme/yaslogist-mark.svg`](./assets/readme/yaslogist-mark.svg) (`512 × 512` `viewBox`, ring `r=238`, `stroke-width=16`, two closed glyph outlines covering `16.1%` of the ring's box), parsed strictly by [`assets/readme/mark.py`](./assets/readme/mark.py) without third-party dependencies. |
+| **Opening hero &amp; stamp** | [`assets/readme/build_profile_index.py`](./assets/readme/build_profile_index.py) renders [`profile-index.gif`](./assets/readme/profile-index.gif) (`1920 × 720`, `200` frames @ `50 ms` = `10.00 s` seamless loop, single 256-colour table, `477,676` bytes) and [`profile-index.png`](./assets/readme/profile-index.png) (`1920 × 720`, `162,926` bytes), plus [`profile-index.build.json`](./assets/readme/profile-index.build.json). |
+| **Automated verification** | [`tools/verify_assets.py`](./tools/verify_assets.py) checks README local asset references, orphan media files, binary GIF89a/PNG headers, mark geometry, build stamps, and (with `--strict`) frame decode, luminance smoothness, and loop-seam continuity. [`tests/`](./tests) holds `39` `unittest` cases; `.github/workflows/verify.yml` runs on Python `3.11` and `3.12`. |
+
+```text
+README.md                               portfolio index, architecture, and verification guide
+assets/readme/profile-index.gif         animated schematic hero (1920x720, 200f @ 50ms, 10.0s)
+assets/readme/profile-index.png         static equilibrium poster (1920x720, all 3 rails shown)
+assets/readme/profile-index.build.json  SHA-256 provenance stamp for profile-index inputs/outputs
+assets/readme/build_profile_index.py    procedural 2x-supersampled Pillow generator + --check
+assets/readme/yaslogist-mark.svg        single-source-of-truth circular YL vector mark
+assets/readme/mark.py                   dependency-free SVG M/L/Z polygon parser and area invariants
+assets/readme/fonts/                    bundled Inter and JetBrains Mono TrueType faces
+assets/readme/yaslogist-signature.png   closing brand signature banner (1200x190)
+assets/readme/{scene,build_hero,build_poster}.py + yaslogist-hero.* + yaslogist-signal.gif
+                                        retained generation-1 artwork & active verifier targets
+assets/platform-map.svg                 retained static multimodal diagram plate
+assets/yaslogist-{motion.gif,poster.png} retired legacy identity files (excluded by LEGACY_MEDIA)
+tools/verify_assets.py                  README reference, orphan, binary GIF/PNG, and stamp verifier
+tests/                                  mark geometry, scene-mark ink, and verifier unit tests
+```
+
+### Prerequisites &amp; Full Local Validation
+
+- **Standard-library checks** require only **Python 3.11+** (matches CI matrix `3.11` / `3.12`).
+- **Regenerating artwork and running `--strict` pixel checks** require `Pillow>=10,<14` and `numpy>=1.24,<3` in an isolated virtual environment (never committed to the repository):
 
 ```bash
 python3 -m venv ~/.venvs/yaslogist-profile
 . ~/.venvs/yaslogist-profile/bin/activate
 python -m pip install "Pillow>=10,<14" "numpy>=1.24,<3"
 
-# Regenerate the opening GIF, poster, and their build stamp when editing its source.
-python assets/readme/build_profile_index.py
+# 1. Rebuild or verify the current portfolio-index hero, poster, and SHA-256 stamp
 python assets/readme/build_profile_index.py --check
+# (Run `python assets/readme/build_profile_index.py` without `--check` to regenerate.)
 
-# Existing checks: README paths, earlier artwork, mark geometry, and tests.
+# 2. Run the full repository asset & README verifier (all 34 structural + pixel checks)
 python tools/verify_assets.py --strict
+
+# 3. Run unit tests, bytecode syntax check, and whitespace hygiene check
 python -m unittest discover -s tests -t . -v
-python -m py_compile assets/readme/build_profile_index.py assets/readme/build_hero.py \
-  assets/readme/build_poster.py assets/readme/scene.py assets/readme/mark.py \
+python -m py_compile \
+  assets/readme/build_profile_index.py \
+  assets/readme/build_hero.py \
+  assets/readme/build_poster.py \
+  assets/readme/scene.py \
+  assets/readme/mark.py \
   tools/verify_assets.py
 git diff --check
 ```
 
-**Known test conflict:** the existing `test_profile_opens_with_static_art_and_opt_in_motion` asserts that the older WebP is the first image and that no GIF is embedded. It already fails with an animated-first README, so the unit-test step in the existing workflow will fail until that expectation is updated. The test and workflow are not changed by this presentation. The existing verifier checks the earlier hero in detail and checks README asset paths, but **does not automatically run the new hero's `--check`**.
+**Disclosed test &amp; CI limitations:**
+1. **`test_profile_opens_with_static_art_and_opt_in_motion` (`tests/test_verify_assets.py`):** This pre-existing test asserts that the older static `./assets/readme/yaslogist-hero.webp` is the first `<img>` in `README.md` and that no `.gif` appears in an `<img>` tag. Under an animated-first hero (`./assets/readme/profile-index.gif`), `38` of `39` unit tests pass and this `1` test fails until `tests/test_verify_assets.py` is updated in a test-scoped change.
+2. **Verifier coverage split:** `python tools/verify_assets.py --strict` verifies `README.md` asset resolution, orphan detection, link counts, mark geometry, and the retained `yaslogist-hero.*` assets (`34` checks passing, `0` warnings), while `python assets/readme/build_profile_index.py --check` separately verifies `profile-index.gif`, `profile-index.png`, and `profile-index.build.json`. `.github/workflows/verify.yml` does not yet invoke `build_profile_index.py --check` or byte-compile `build_profile_index.py`.
+3. **Cross-machine rasterization:** FreeType glyph antialiasing and palette quantization can vary slightly across OS/Pillow builds; freshness is therefore enforced via SHA-256 input/output build stamps rather than cross-machine pixel equality.
 
 <details>
-<summary><strong>Earlier artwork and its tooling</strong></summary>
+<summary><strong>Measured properties of the opening hero (<code>profile-index.gif</code> &amp; <code>profile-index.png</code>)</strong></summary>
 
-The previous illustrative globe remains available as a <a href="./assets/readme/yaslogist-hero.gif">10-second GIF</a>, [PNG](./assets/readme/yaslogist-hero.png), and [lightweight WebP](./assets/readme/yaslogist-hero.webp), along with its [signal divider](./assets/readme/yaslogist-signal.gif) and [workstream plate](./assets/platform-map.svg). These are conceptual portfolio illustrations, not live logistics data or a shared runtime.
-
-[`scene.py`](./assets/readme/scene.py) and [`build_hero.py`](./assets/readme/build_hero.py) generate the 1920 × 720, 200-frame globe GIF and PNG, plus [`yaslogist-hero.build.json`](./assets/readme/yaslogist-hero.build.json), which records the earlier artwork's source and output hashes. [`build_poster.py`](./assets/readme/build_poster.py) derives the WebP from the PNG and records its source hash. To rebuild those earlier assets with the same Python environment, run:
-
-```bash
-python assets/readme/build_hero.py
-python assets/readme/build_poster.py
-```
-
-The existing verifier checks that earlier GIF's structure, timing, palette, loop and build stamp, as well as the WebP's relationship to its PNG source. It can be run without Pillow for structural checks, but `--strict` requires the image and scene dependencies. `python tools/verify_assets.py --probe` also re-renders a frame for an informational comparison; pixel differences between renderers are not a pass/fail freshness test. The old builder's `--stamp-only` option is appropriate only for edits that cannot change pixels.
+| Metric | Measured value |
+| :--- | :--- |
+| Canvas &amp; safe inset | `1920 × 720 px` (`2×` supersampled at `3840 × 1440`, Lanczos downsampled); all text, symbols, and tiles inside the `5%` safe inset (`[96..1824] × [36..684]`) |
+| Typography scale &amp; WCAG contrast | Primary lockup `100 px` (`Inter-ExtraBold`); secondary labels `36–42 px` (`Inter-SemiBold`, `JetBrains Mono`); measured WCAG 2.1 contrast `8.20:1` to `16.93:1` against plate backgrounds |
+| Animation loop &amp; cadence | `GIF89a`, `200` decoded frames @ uniform `50 ms/frame` = **`10.00 s`**, `NETSCAPE2.0` `loop=0` (infinite), single shared `256`-colour global table (`dither=NONE`) |
+| Motion smoothness &amp; seam | Median `0.057%` changed pixels/step, peak `1.856%`, wrap-around seam `0.035%` (`frame[199] → frame[0]`), max global brightness step `0.250 / 255` (`< 3 Hz` flash threshold) |
+| Byte size | Animated GIF: **`477,676` bytes** (`466.5 KiB`); static PNG poster: **`162,926` bytes** (`159.1 KiB`) |
+| Reduced-motion fallback | [`profile-index.png`](./assets/readme/profile-index.png) renders all three rails (`01 Multimodal`, `02 Products`, `03 Labs`) simultaneously at balanced illumination so no meaning depends on animation |
 
 </details>
 
-## 08 / Scope &amp; status
+<details>
+<summary><strong>Retained generation-1 artwork &amp; verifier targets</strong></summary>
 
-- **Present here:** portfolio content, local visual assets, asset generators, verification tools, and tests.
-- **Described, not independently verified here:** capabilities and demos of the linked public projects. Each repository is the source for its own setup and current maturity.
-- **Vision:** Land is a broader workstream direction, not a standalone repository linked by this profile.
-- **Not asserted:** live operational feeds, uptime, commercial deployment, or integrations between these projects. This repository does not ingest shipment events or call project APIs at runtime.
+Earlier repository iterations shipped an illustrative orthographic globe hero and multimodal plate that remain committed because `tools/verify_assets.py` and `tests/test_verify_assets.py` directly inspect their headers, build stamp, and orphan status:
+
+- **Generation-1 globe media:** [`yaslogist-hero.gif`](./assets/readme/yaslogist-hero.gif) (`1920 × 720`, `200` frames @ `50 ms`, `10,205,727` bytes), [`yaslogist-hero.png`](./assets/readme/yaslogist-hero.png) (`1,424,508` bytes), and [`yaslogist-hero.webp`](./assets/readme/yaslogist-hero.webp) (`140,126` bytes, XMP-linked to the PNG SHA-256), built by [`scene.py`](./assets/readme/scene.py), [`build_hero.py`](./assets/readme/build_hero.py), and [`build_poster.py`](./assets/readme/build_poster.py) with provenance in [`yaslogist-hero.build.json`](./assets/readme/yaslogist-hero.build.json).
+- **Supporting plates:** [`yaslogist-signal.gif`](./assets/readme/yaslogist-signal.gif) (`1200 × 30` animated divider) and [`assets/platform-map.svg`](./assets/platform-map.svg) (`1200 × 348` static Land / Ocean / Air / Data schematic). All routes and labels in these retained files are conceptual portfolio illustrations, not live operational feeds.
+
+</details>
+
+---
+
+## 05 / Status &amp; Boundaries
+
+| Classification | Scope in `YASLOGIST-Profile` |
+| :--- | :--- |
+| **`Implemented — verified`** | Root `README.md`, procedural portfolio-index artwork (`profile-index.gif`, `profile-index.png`, `profile-index.build.json`, `build_profile_index.py`), single-source SVG mark geometry (`yaslogist-mark.svg`, `mark.py`), retained generation-1 media, and `tools/verify_assets.py` (`34/34` checks passing with `--strict`). |
+| **`Present — unverified here`** | All ten linked public repositories under [`github.com/YASLOGIST`](https://github.com/YASLOGIST) and their listed demo URLs; also `.github/workflows/verify.yml` execution on remote runners (inspected locally, not triggered in this session). |
+| **`Planned / vision`** | **Land** as a standalone multimodal workstream (represented as the gated dashed fifth module on Rail `01`; no standalone repository linked). |
+| **`Not asserted`** | Live telemetry, real-time shipment tracking, cross-project software integration, commercial production SLAs, security certifications, customer metrics, or guaranteed external demo uptime. |
+
+### Contributing &amp; Maintenance Notes
+
+When updating `README.md` or anything under `assets/readme/`, keep every local media reference resolving cleanly, rebuild the corresponding `.build.json` provenance stamp (`python assets/readme/build_profile_index.py`), and run both `python assets/readme/build_profile_index.py --check` and `python tools/verify_assets.py --strict` before opening a pull request.
 
 ---
 
@@ -178,9 +221,7 @@ The existing verifier checks that earlier GIF's structure, timing, palette, loop
   <br />
   <a href="https://www.yaslogist.com">Official website</a> ·
   <a href="https://github.com/YASLOGIST?tab=repositories">Public repositories</a> ·
-  <a href="mailto:support@yaslogist.com">Email YASLOGIST</a>
+  <a href="mailto:support@yaslogist.com">support@yaslogist.com</a>
   <br /><br />
-  <b>YASLOGIST</b><br />
-  <sub>MOVE SMARTER. SEE FURTHER.</sub><br />
-  <sub>Engineering and digital products · Cairo, Egypt</sub>
+  <b>YASLOGIST</b> · <sub>MOVE SMARTER. SEE FURTHER. · Cairo, Egypt</sub>
 </div>
