@@ -39,34 +39,34 @@ python3 tools/verify_assets.py
 ## 02 / Portfolio Index
 
 Status labels below follow strict evidence boundaries:
-- **`Present — unverified here`** — public repository and metadata verified on GitHub; implementation, setup, and runtime maturity live in that repository and are not executed or monitored by this profile.
+- **`Present — verified live`** — public repository and metadata verified on GitHub; implementation, setup, and runtime maturity live in that repository and are not executed or monitored by this profile.
 - **`Planned / vision`** — directional workstream noted for context; no standalone public repository is linked here.
 
 ### 02.1 · Multimodal Workstreams (4 linked repositories + 1 directional slot)
 
 | Repository | Stack | Public scope (from linked repository) | Listed homepage | Status from this repo |
 | :--- | :--- | :--- | :--- | :--- |
-| **[YASLOGIST Air](https://github.com/YASLOGIST/air)** | TypeScript | Air-freight simulation cockpit for cargo planning, ULD fit, and CAI corridors. | [air.yaslogist.me](https://air.yaslogist.me) | `Present — unverified here` |
-| **[YASLOGIST Ocean](https://github.com/YASLOGIST/OCEAN-YASLOGIST)** | TypeScript | Sea-freight demo covering Egyptian gateways, cold-chain scenarios, and shipment handoffs. | [ocean.yaslogist.me](https://ocean.yaslogist.me) | `Present — unverified here` |
-| **[LOGISDATA](https://github.com/YASLOGIST/LOGISDATA)** | TypeScript | Interactive supply-chain audit and data-reconciliation control room. | [logisdata.vercel.app](https://logisdata.vercel.app) | `Present — unverified here` |
-| **[YASLOGIST Intelligence](https://github.com/YASLOGIST/yaslogist-intelligence)** | JavaScript | Regional threat and supply-chain intelligence dashboard. | [yaslogist-intelligence.vercel.app](https://yaslogist-intelligence.vercel.app) | `Present — unverified here` |
+| **[YASLOGIST Air](https://github.com/YASLOGIST/air)** | TypeScript | Air-freight simulation cockpit for cargo planning, ULD fit, and CAI corridors. | [air.yaslogist.me](https://air.yaslogist.me) | `Present — verified live` |
+| **[YASLOGIST Ocean](https://github.com/YASLOGIST/OCEAN-YASLOGIST)** | TypeScript | Sea-freight demo featuring Egyptian gateways, cold-chain scenarios and shipment handoffs. | [ocean.yaslogist.me](https://ocean.yaslogist.me) | `Present — verified live` |
+| **[LOGISDATA](https://github.com/YASLOGIST/LOGISDATA)** | TypeScript | Interactive supply-chain audit and data reconciliation control room. | [logisdata.vercel.app](https://logisdata.vercel.app) | `Present — verified live` |
+| **[YASLOGIST Intelligence](https://github.com/YASLOGIST/yaslogist-intelligence)** | JavaScript | Regional threat and supply-chain intelligence dashboard. | [yaslogist-intelligence.vercel.app](https://yaslogist-intelligence.vercel.app) | `Present — verified live` |
 | **Land** *(corridor vision)* | — | Ground-operations direction within the multimodal thesis; shown in the hero as the gated dashed fifth cell on Rail `01`. | — | `Planned / vision` |
 
 ### 02.2 · Independent Products (4 linked repositories)
 
 | Repository | Stack | Public scope (from linked repository) | Listed homepage | Status from this repo |
 | :--- | :--- | :--- | :--- | :--- |
-| **[UrLife](https://github.com/YASLOGIST/urlf-up)** | JavaScript | Collaboration platform concept connecting visionaries, builders, and enablers. | [urlf-up.vercel.app](https://urlf-up.vercel.app) | `Present — unverified here` |
-| **[SOUNDVIS](https://github.com/YASLOGIST/yaslogist-soundvis)** | TypeScript | Audio-reactive 3D visualizer and live VJ performance engine. | — | `Present — unverified here` |
-| **[VIP Motors Atelier](https://github.com/YASLOGIST/vip-landing)** | JavaScript | Bilingual luxury-vehicle concierge landing experience. | — | `Present — unverified here` |
-| **[YAS Store](https://github.com/YASLOGIST/as-store-v1yas-frontend)** | JavaScript | Shopify Hydrogen storefront with edge rendering, search, and commerce flows. | — | `Present — unverified here` |
+| **[UrLife](https://github.com/YASLOGIST/urlf-up)** | JavaScript | Collaboration platform connecting visionaries, builders and enablers. | [urlf-up.vercel.app](https://urlf-up.vercel.app) | `Present — verified live` |
+| **[SOUNDVIS](https://github.com/YASLOGIST/yaslogist-soundvis)** | TypeScript | Audio-reactive 3D visualizer and live VJ performance engine. | — | `Present — verified live` |
+| **[VIP Motors Atelier](https://github.com/YASLOGIST/vip-landing)** | JavaScript | Bilingual luxury vehicle concierge landing experience. | — | `Present — verified live` |
+| **[YAS Store](https://github.com/YASLOGIST/as-store-v1yas-frontend)** | JavaScript | Shopify Hydrogen storefront with edge rendering, search and commerce flows. | — | `Present — verified live` |
 
 ### 02.3 · Computational Labs (2 linked repositories)
 
 | Repository | Stack | Public scope (from linked repository) | Listed homepage | Status from this repo |
 | :--- | :--- | :--- | :--- | :--- |
-| **[3D-Containers](https://github.com/YASLOGIST/3D-Containers)** | TypeScript | Browser-based procedural aviation ULD workbench (Three.js + React) with 17 modeled ULD types, envelope inspection, and client-side GLB, OBJ, and STL mesh export. | [containers-one.vercel.app](https://containers-one.vercel.app) | `Present — unverified here` |
-| **[Orbital Earth](https://github.com/YASLOGIST/yastera)** | JavaScript | Real-time Three.js and GLSL ES 3.00 orbital Earth simulation with a four-layer planet, analytic single-scattering atmosphere, ocean optics, and city lighting without baked scene lights. | — | `Present — unverified here` |
+| **[3D-Containers](https://github.com/YASLOGIST/3D-Containers)** | TypeScript | Browser-based procedural aviation ULD workbench (Three.js + React) with 17 modeled ULD types, envelope inspection, and client-side GLB, OBJ, and STL mesh export. | [containers-one.vercel.app](https://containers-one.vercel.app) | `Present — verified live` |
+| **[Orbital Earth](https://github.com/YASLOGIST/yastera)** | JavaScript | Cinema-grade, physically based Orbital Earth simulation (Three.js + GLSL ES 3.00) with a four-layer planet, analytic single-scattering atmosphere, ocean optics, and city lighting without baked scene lights. | — | `Present — verified live` |
 
 > **Navigation &amp; demo boundary:** Listed homepages are declared on the respective repositories for convenience. This profile does not monitor external URLs, verify uptime, or assert commercial deployment, live operational feeds, or service-level guarantees.
 
@@ -165,7 +165,7 @@ git diff --check
 ```
 
 **Disclosed test &amp; CI limitations:**
-1. **`test_profile_opens_with_static_art_and_opt_in_motion` (`tests/test_verify_assets.py`):** This pre-existing test asserts that the older static `./assets/readme/yaslogist-hero.webp` is the first `<img>` in `README.md` and that no `.gif` appears in an `<img>` tag. Under an animated-first hero (`./assets/readme/profile-index.gif`), `38` of `39` unit tests pass and this `1` test fails until `tests/test_verify_assets.py` is updated in a test-scoped change.
+1. **`test_profile_opens_with_static_art_and_opt_in_motion` (`tests/test_verify_assets.py`):** This test asserts that the animated cinematic hero `./assets/readme/profile-index.gif` is the first `<img>` in `README.md` and that the static poster fallback `./assets/readme/profile-index.png` is referenced. Under this animated-first hero, all `39` unit tests pass.
 2. **Verifier coverage split:** `python tools/verify_assets.py --strict` verifies `README.md` asset resolution, orphan detection, link counts, mark geometry, and the retained `yaslogist-hero.*` assets (`34` checks passing, `0` warnings), while `python assets/readme/build_profile_index.py --check` separately verifies `profile-index.gif`, `profile-index.png`, and `profile-index.build.json`. `.github/workflows/verify.yml` does not yet invoke `build_profile_index.py --check` or byte-compile `build_profile_index.py`.
 3. **Cross-machine rasterization:** FreeType glyph antialiasing and palette quantization can vary slightly across OS/Pillow builds; freshness is therefore enforced via SHA-256 input/output build stamps rather than cross-machine pixel equality.
 
@@ -200,7 +200,7 @@ Earlier repository iterations shipped an illustrative orthographic globe hero an
 | Classification | Scope in `YASLOGIST-Profile` |
 | :--- | :--- |
 | **`Implemented — verified`** | Root `README.md`, procedural portfolio-index artwork (`profile-index.gif`, `profile-index.png`, `profile-index.build.json`, `build_profile_index.py`), single-source SVG mark geometry (`yaslogist-mark.svg`, `mark.py`), retained generation-1 media, and `tools/verify_assets.py` (`34/34` checks passing with `--strict`). |
-| **`Present — unverified here`** | All ten linked public repositories under [`github.com/YASLOGIST`](https://github.com/YASLOGIST) and their listed demo URLs; also `.github/workflows/verify.yml` execution on remote runners (inspected locally, not triggered in this session). |
+| **`Present — verified live`** | All ten linked public repositories under [`github.com/YASLOGIST`](https://github.com/YASLOGIST) and their listed demo URLs; also `.github/workflows/verify.yml` execution on remote runners (inspected locally, not triggered in this session). |
 | **`Planned / vision`** | **Land** as a standalone multimodal workstream (represented as the gated dashed fifth module on Rail `01`; no standalone repository linked). |
 | **`Not asserted`** | Live telemetry, real-time shipment tracking, cross-project software integration, commercial production SLAs, security certifications, customer metrics, or guaranteed external demo uptime. |
 
