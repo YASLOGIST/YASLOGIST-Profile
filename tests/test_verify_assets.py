@@ -44,10 +44,10 @@ class VerifyAssetsTest(unittest.TestCase):
         text = verify_assets.README.read_text(encoding="utf-8")
         image_sources = re.findall(r'<img\b[^>]*\bsrc="([^"]+)"', text, re.DOTALL)
         self.assertTrue(image_sources)
-        self.assertEqual(image_sources[0], "./assets/readme/yaslogist-hero.webp")
-        self.assertFalse(any(src.lower().endswith(".gif") for src in image_sources),
-                         "profile images should not autoplay animation")
-        self.assertIn('href="./assets/readme/yaslogist-hero.gif"', text)
+        self.assertEqual(image_sources[0], "./assets/readme/profile-index.gif")
+        self.assertTrue(any(src.lower().endswith(".gif") for src in image_sources),
+                         "profile images should include the animated hero GIF")
+        self.assertIn('href="./assets/readme/profile-index.png"', text)
 
     def test_light_poster_matches_master_and_detects_staleness(self) -> None:
         if importlib.util.find_spec("PIL") is None:
