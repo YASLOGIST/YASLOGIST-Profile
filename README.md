@@ -205,10 +205,12 @@ The following is a dated **maintainer-run source-code check**, not a third-party
 | :--- | :--- | :--- | :--- |
 | [YASLOGIST Intelligence](https://github.com/YASLOGIST/yaslogist-intelligence) | [`484b31b`](https://github.com/YASLOGIST/yaslogist-intelligence/tree/484b31bccf4e2e22d39ba162f20d079505636362) | Node.js 26.8.1; `npm run ci` | 134 tests passed, 0 failed, 0 skipped; five data artefacts validated; performance budgets passed (477.7 KB total local surface); repository security-pattern scan passed across 67 tracked files. |
 | [ULD360](https://github.com/YASLOGIST/3D-Containers) | [`8f50d92`](https://github.com/YASLOGIST/3D-Containers/tree/8f50d923f941446d21ec1bbf6c07d822aab11119) | Node.js 26.8.1; `npm ci --ignore-scripts` with isolated npm configuration; `npm run verify` | 129 tests passed, 0 failed, 0 skipped; TypeScript and production build passed. |
+| [YASLOGIST AIR](https://github.com/YASLOGIST/air) | [`2cc1caa`](https://github.com/YASLOGIST/air/tree/2cc1caa9eec8481dc64d68626924ecfa03c6a8f0) | Node.js 26.8.1; `npm ci --ignore-scripts` with isolated npm configuration; `npm run check` | TypeScript, Vitest suite, production build and bundle guard passed. Application JavaScript: 505.0 KiB (168.7 KiB gzip), within 509.8 KiB limit; separate Three.js vendor chunk: 567.0 KiB (139.6 KiB gzip), within 578.1 KiB limit. |
+| [YASLOGIST OCEAN](https://github.com/YASLOGIST/OCEAN-YASLOGIST) | [`5a39e93`](https://github.com/YASLOGIST/OCEAN-YASLOGIST/tree/5a39e93a70d8392445bd00835ba5e46d71cb0458) | Node.js 26.8.1; `npm ci --ignore-scripts` with isolated npm configuration; `npm run gate` | 41/41 scroll-harness assertions passed; TypeScript, production build and artifact checks passed; 7/7 injected artifact violations detected. Inlined HTML shell: 745,991 bytes. Vite warned that the local font stylesheet is resolved at runtime; the artifact guard verified that the external CSS reference resolves to a shipped file. |
 
 The Intelligence project's [manifest](https://github.com/YASLOGIST/yaslogist-intelligence/blob/484b31bccf4e2e22d39ba162f20d079505636362/package.json) and [lockfile](https://github.com/YASLOGIST/yaslogist-intelligence/blob/484b31bccf4e2e22d39ba162f20d079505636362/package-lock.json) declare no npm dependencies or development dependencies. The root package is private and is not an external package to install from npm. External browser resources are a separate trust boundary. The repository's pattern scanner and data schema checks cannot establish the absence of vulnerabilities or independently verify the truth of reported events.
 
-To reproduce from the public repository:
+To reproduce the Intelligence check from its public repository:
 
 ```bash
 git clone https://github.com/YASLOGIST/yaslogist-intelligence.git
@@ -216,6 +218,25 @@ cd yaslogist-intelligence
 git checkout 484b31bccf4e2e22d39ba162f20d079505636362
 npm run ci
 ```
+
+
+To reproduce the AIR and OCEAN checks, use a disposable checkout with Node.js 26.8.1 and a clean npm configuration:
+
+```bash
+git clone https://github.com/YASLOGIST/air.git
+cd air
+git checkout 2cc1caa9eec8481dc64d68626924ecfa03c6a8f0
+npm ci --ignore-scripts
+npm run check
+cd ..
+git clone https://github.com/YASLOGIST/OCEAN-YASLOGIST.git
+cd OCEAN-YASLOGIST
+git checkout 5a39e93a70d8392445bd00835ba5e46d71cb0458
+npm ci --ignore-scripts
+npm run gate
+```
+
+The AIR check did not include a separate npm audit; OCEAN's checks are scoped to the source, scroll harness and built artifact. Neither result establishes field performance, live transport operations or browser/device-wide compatibility.
 
 ---
 
