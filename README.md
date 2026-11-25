@@ -10,9 +10,11 @@
 
 # YASLOGIST-Profile
 
-**Self-verified public portfolio index mapping ten independent repositories across multimodal logistics, digital products, and computational labs.**
+**Public engineering portfolio mapping ten independent repositories across multimodal logistics, digital products, and computational labs.**
 
 A public engineering portfolio by **[YASLOGIST](https://www.yaslogist.com)** · Cairo, Egypt
+
+Founded by [Ahmed Yasser Ali](https://www.yaslogist.com/about#founder). YASLOGIST is developing shipment visibility software to reconcile shipment references and events across road, sea and air. Its public product demonstrations illustrate the proposed workflows; they do not establish a live commercial tracking network.
 
 [Portfolio Index](#02--portfolio-index) · [Topology &amp; Provenance](#03--topology--provenance-flow) · [Tooling &amp; Validation](#04--repository-tooling--validation) · [Status &amp; Boundaries](#05--status--boundaries) · [yaslogist.com](https://www.yaslogist.com)
 
@@ -49,8 +51,8 @@ Status labels below follow strict evidence boundaries:
 | **[YASLOGIST Air](https://github.com/YASLOGIST/air)** | TypeScript | Air-freight simulation cockpit for cargo planning, ULD fit, and CAI corridors. | [air.yaslogist.me](https://air.yaslogist.me) | `Present — verified live` |
 | **[YASLOGIST Ocean](https://github.com/YASLOGIST/OCEAN-YASLOGIST)** | TypeScript | Sea-freight demo featuring Egyptian gateways, cold-chain scenarios and shipment handoffs. | [ocean.yaslogist.me](https://ocean.yaslogist.me) | `Present — verified live` |
 | **[LOGISDATA](https://github.com/YASLOGIST/LOGISDATA)** | TypeScript | Interactive supply-chain audit and data reconciliation control room. | [logisdata.vercel.app](https://logisdata.vercel.app) | `Present — verified live` |
-| **[YASLOGIST Intelligence](https://github.com/YASLOGIST/yaslogist-intelligence)** | JavaScript | Regional threat and supply-chain intelligence dashboard. | [yaslogist-intelligence.vercel.app](https://yaslogist-intelligence.vercel.app) | `Present — verified live` |
-| **Land** *(corridor vision)* | — | Ground-operations direction within the multimodal thesis; shown in the hero as the gated dashed fifth cell on Rail `01`. | — | `Planned / vision` |
+| **[YASLOGIST Intelligence](https://github.com/YASLOGIST/yaslogist-intelligence)** | JavaScript | Regional threat and supply-chain intelligence dashboard. | [intelligence.yaslogist.com](https://intelligence.yaslogist.com/) | `Present — verified live` |
+| **Land** *(corridor vision)* | — | Ground-operations direction within the multimodal thesis; shown in the hero as the gated dashed fifth cell on Rail `01`. Public browser demonstration available; no source repository is linked here. | [land.yaslogist.me](https://land.yaslogist.me/) | `Planned / vision` (standalone public repository only) |
 
 ### 02.2 · Independent Products (4 linked repositories)
 
@@ -201,7 +203,7 @@ Earlier repository iterations shipped an illustrative orthographic globe hero an
 | :--- | :--- |
 | **`Implemented — verified`** | Root `README.md`, procedural portfolio-index artwork (`profile-index.gif`, `profile-index.png`, `profile-index.build.json`, `build_profile_index.py`), single-source SVG mark geometry (`yaslogist-mark.svg`, `mark.py`), retained generation-1 media, and `tools/verify_assets.py` (`34/34` checks passing with `--strict`). |
 | **`Present — verified live`** | All ten linked public repositories under [`github.com/YASLOGIST`](https://github.com/YASLOGIST) and their listed demo URLs; also `.github/workflows/verify.yml` execution on remote runners (inspected locally, not triggered in this session). |
-| **`Planned / vision`** | **Land** as a standalone multimodal workstream (represented as the gated dashed fifth module on Rail `01`; no standalone repository linked). |
+| **`Planned / vision`** | **Land** as a standalone public-repository workstream (represented as the gated dashed fifth module on Rail `01`; no standalone source repository linked). The [public demonstration](https://land.yaslogist.me/) is accessible; this does not imply operational freight tracking. |
 | **`Not asserted`** | Live telemetry, real-time shipment tracking, cross-project software integration, commercial production SLAs, security certifications, customer metrics, or guaranteed external demo uptime. |
 
 ### Contributing &amp; Maintenance Notes
@@ -221,6 +223,8 @@ When updating `README.md` or anything under `assets/readme/`, keep every local m
   <br />
   <a href="https://www.yaslogist.com">Official website</a> ·
   <a href="https://github.com/YASLOGIST?tab=repositories">Public repositories</a> ·
+  <a href="https://www.linkedin.com/company/yaslogist">Company LinkedIn</a> ·
+  <a href="https://founder.yaslogist.com/en">Founder portfolio</a> ·
   <a href="mailto:support@yaslogist.com">support@yaslogist.com</a>
   <br /><br />
   <b>YASLOGIST</b> · <sub>MOVE SMARTER. SEE FURTHER. · Cairo, Egypt</sub>
