@@ -197,6 +197,27 @@ Earlier repository iterations shipped an illustrative orthographic globe hero an
 
 ---
 
+### Reproducible project-level validation snapshot
+
+The following is a dated **maintainer-run source-code check**, not a third-party certification, a live-service audit, or a test of this portfolio's shared runtime.
+
+| Project | Source revision | Reproduction | Observed result (2026-11-25) |
+| :--- | :--- | :--- | :--- |
+| [YASLOGIST Intelligence](https://github.com/YASLOGIST/yaslogist-intelligence) | [`484b31b`](https://github.com/YASLOGIST/yaslogist-intelligence/tree/484b31bccf4e2e22d39ba162f20d079505636362) | Node.js 26.8.1; `npm run ci` | 134 tests passed, 0 failed, 0 skipped; five data artefacts validated; performance budgets passed (477.7 KB total local surface); repository security-pattern scan passed across 67 tracked files. |
+
+The Intelligence project's [manifest](https://github.com/YASLOGIST/yaslogist-intelligence/blob/484b31bccf4e2e22d39ba162f20d079505636362/package.json) and [lockfile](https://github.com/YASLOGIST/yaslogist-intelligence/blob/484b31bccf4e2e22d39ba162f20d079505636362/package-lock.json) declare no npm dependencies or development dependencies. The root package is private and is not an external package to install from npm. External browser resources are a separate trust boundary. The repository's pattern scanner and data schema checks cannot establish the absence of vulnerabilities or independently verify the truth of reported events.
+
+To reproduce from the public repository:
+
+```bash
+git clone https://github.com/YASLOGIST/yaslogist-intelligence.git
+cd yaslogist-intelligence
+git checkout 484b31bccf4e2e22d39ba162f20d079505636362
+npm run ci
+```
+
+---
+
 ## 05 / Status &amp; Boundaries
 
 | Classification | Scope in `YASLOGIST-Profile` |
